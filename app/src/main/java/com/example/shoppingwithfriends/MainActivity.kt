@@ -5,8 +5,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.ui.NavDisplay
 import com.example.shoppingwithfriends.ui.theme.ShoppingWithFriendsTheme
 import com.example.shoppingwithfriends.features.login.LoginScreenComposables.LoginScreen
 
@@ -17,9 +24,32 @@ class MainActivity : ComponentActivity() {
         setContent {
             ShoppingWithFriendsTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LoginScreen(Modifier)
+                    MyApp()
                 }
             }
         }
     }
+
+    @Composable
+    fun MyApp() {
+        // Create a back stack, specifying the key the app should start with
+        val backStack = remember { mutableStateListOf<Any>(Login) }
+        NavDisplay(
+            backStack = backStack,
+            onBack = { backStack.removeLastOrNull() },
+            entryProvider = { key ->
+                when (key) {
+                    is Login -> NavEntry(key) {
+                        LoginScreen({backStack.add(Home)})
+                    }
+                    is Home -> NavEntry(key) {
+                        Text("Home")
+                    }
+                    else -> NavEntry(Unit) { Text("Unknown route") }
+                }
+            }
+        )
+    }
 }
+data object Login
+data object Home

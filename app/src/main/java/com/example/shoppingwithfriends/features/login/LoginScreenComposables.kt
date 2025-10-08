@@ -19,7 +19,7 @@ import com.google.android.gms.common.SignInButton
 
 object LoginScreenComposables {
     @Composable
-    fun LoginScreen(modifier: Modifier){
+    fun LoginScreen(onSuccess: () -> Unit){
         Column (Modifier.padding(24.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
             Image(
                 painter = painterResource(id = R.drawable.shoppingcart),
@@ -28,7 +28,9 @@ object LoginScreenComposables {
                 contentScale = ContentScale.Fit,      // Crop/Fill/Fit as needed
             )
             Text(stringResource( R.string.app_name), fontSize = 32.sp, modifier = Modifier.padding(vertical = 15.dp))
-            GoogleSignInButton {  }
+            GoogleSignInButton {
+                onSuccess()
+            }
         }
     }
 
