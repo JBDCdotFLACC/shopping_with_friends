@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
@@ -12,8 +13,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
+import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables
+import com.example.shoppingwithfriends.features.login.LoginScreenComposables
 import com.example.shoppingwithfriends.ui.theme.ShoppingWithFriendsTheme
 import com.example.shoppingwithfriends.features.login.LoginScreenComposables.LoginScreen
 
@@ -23,7 +27,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ShoppingWithFriendsTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(modifier = Modifier.fillMaxSize().background(color = Color.White)) { innerPadding ->
                     MyApp()
                 }
             }
@@ -43,7 +47,7 @@ class MainActivity : ComponentActivity() {
                         LoginScreen({backStack.add(Home)})
                     }
                     is Home -> NavEntry(key) {
-                        Text("Home")
+                        HomeScreenComposables.CenterAlignedTopAppBarExample()
                     }
                     else -> NavEntry(Unit) { Text("Unknown route") }
                 }
