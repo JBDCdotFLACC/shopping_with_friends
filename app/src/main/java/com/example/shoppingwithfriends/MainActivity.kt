@@ -20,7 +20,9 @@ import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables
 import com.example.shoppingwithfriends.features.login.LoginScreenComposables
 import com.example.shoppingwithfriends.ui.theme.ShoppingWithFriendsTheme
 import com.example.shoppingwithfriends.features.login.LoginScreenComposables.LoginScreen
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
