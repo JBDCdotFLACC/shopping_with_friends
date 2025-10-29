@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
                         LoginScreen({backStack.add(Home)})
                     }
                     is Home -> NavEntry(key) {
-                        HomeScreenComposables.CenterAlignedTopAppBarExample()
+                        HomeScreenComposables.HomeRoute()
                     }
                     else -> NavEntry(Unit) { Text("Unknown route") }
                 }

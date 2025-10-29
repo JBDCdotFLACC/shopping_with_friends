@@ -5,7 +5,7 @@ import com.example.shoppingwithfriends.models.ShoppingListItem
 import java.util.Date
 import javax.inject.Inject
 
-class ShoppingListRepositoryImpl @Inject constructor() : ShoppingListRepository {
+class ShoppingListRepositoryFakeImpl @Inject constructor() : ShoppingListRepository {
     override suspend fun getListsForUser(userId: Int): List<ShoppingList> {
         return fakeShoppingLists
     }
