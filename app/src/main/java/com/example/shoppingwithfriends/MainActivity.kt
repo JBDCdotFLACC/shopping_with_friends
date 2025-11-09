@@ -51,6 +51,9 @@ class MainActivity : ComponentActivity() {
                     is Home -> NavEntry(key) {
                         HomeScreenComposables.HomeRoute()
                     }
+                    is List -> NavEntry(key){
+
+                    }
                     else -> NavEntry(Unit) { Text("Unknown route") }
                 }
             }
@@ -59,3 +62,4 @@ class MainActivity : ComponentActivity() {
 }
 data object Login
 data object Home
+data object List

@@ -43,7 +43,7 @@ android {
 }
 
 dependencies {
-
+    val room_version = "2.8.3"
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -69,4 +69,12 @@ dependencies {
     implementation(libs.hilt.android)
     implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
     kapt(libs.hilt.compiler)
+    implementation("androidx.room:room-runtime:$room_version")
+    kapt(libs.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.rxjava2)
+    implementation(libs.androidx.room.rxjava3)
+    implementation(libs.androidx.room.guava)
+    testImplementation(libs.androidx.room.testing)
+    implementation(libs.androidx.room.paging)
 }

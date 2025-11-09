@@ -11,26 +11,22 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.shoppingwithfriends.R
+import com.example.shoppingwithfriends.features.common.CommonComposables.AppScaffold
 import com.example.shoppingwithfriends.models.ShoppingList
 import com.example.shoppingwithfriends.viewmodels.HomeScreenViewModel
 
@@ -44,45 +40,25 @@ object HomeScreenComposables {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun CenterAlignedTopAppBar(uiState : HomeScreenViewModel.UiState) {
-        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-
-        Scaffold(
-            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-
-            topBar = {
-                CenterAlignedTopAppBar(
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        titleContentColor = MaterialTheme.colorScheme.primary,
-                    ),
-                    title = {
-                        Text(
-                            stringResource(R.string.app_name),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { /* do something */ }) {
-                            Icon(
-                                imageVector = Icons.Filled.Person,
-                                contentDescription = "Localized description"
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = { /* do something */ }) {
-                            Icon(
-                                imageVector = Icons.Filled.Menu,
-                                contentDescription = "Localized description"
-                            )
-                        }
-                    },
-                    scrollBehavior = scrollBehavior,
+        AppScaffold(
+            title = {
+                Text(
+                    text = stringResource(R.string.app_name),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             },
+            navigationIcon = {
+                IconButton(onClick = { /* TODO */ }) {
+                    Icon(Icons.Filled.Person, contentDescription = "Profile")
+                }
+            },
+            actions = {
+                IconButton(onClick = { /* open menu */ }) {
+                    Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                }
+            }
         ) { innerPadding ->
-
             when {
                 uiState.isLoading -> Loading(innerPadding)
                 uiState.error != null -> Error(innerPadding)
