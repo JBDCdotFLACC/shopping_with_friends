@@ -11,7 +11,7 @@ class ShoppingListRepositoryFakeImpl @Inject constructor() : ShoppingListReposit
     }
 
     override suspend fun addNewShoppingList(
-        shoppingList: com.example.shoppingwithfriends.models.ShoppingList,
+        shoppingList: ShoppingList,
         userId: Int
     ) {
 
@@ -21,6 +21,18 @@ class ShoppingListRepositoryFakeImpl @Inject constructor() : ShoppingListReposit
     override suspend fun addFriendToShoppingList(shoppingListId: Int, friendId: Int) {
 
     }
+
+    override suspend fun getShoppingList(shoppingListId: Int): ShoppingList {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun setShoppingListItemCheck(
+        shoppingListItem: ShoppingListItem,
+        isChecked: Boolean
+    ) {
+        TODO("Not yet implemented")
+    }
+
     val shoppingList1 = ShoppingList(1, Date(), "First List",
         listOf<ShoppingListItem>(ShoppingListItem(1, "Bread", false),
             ShoppingListItem(2, "fruit", true),
