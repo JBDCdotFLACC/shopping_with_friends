@@ -1,10 +1,9 @@
 package com.example.shoppingwithfriends.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.shoppingwithfriends.data.ShoppingListRepository
-import com.example.shoppingwithfriends.models.ShoppingList
+import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +15,7 @@ import kotlinx.coroutines.launch
 class HomeScreenViewModel @Inject constructor(private val repo: ShoppingListRepository): ViewModel() {
     data class UiState(
         val isLoading: Boolean = false,
-        val items: List<ShoppingList> = emptyList(),
+        val items: List<LocalShoppingList> = emptyList(),
         val error: String? = null
     )
 

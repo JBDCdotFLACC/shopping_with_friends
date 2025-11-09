@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.shoppingwithfriends.R
+import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
 import com.example.shoppingwithfriends.features.common.CommonComposables.AppScaffold
 import com.example.shoppingwithfriends.models.ShoppingList
 import com.example.shoppingwithfriends.viewmodels.HomeScreenViewModel
@@ -104,12 +105,11 @@ object HomeScreenComposables {
     }
 
     @Composable
-    fun ShoppingListRow(shoppingList: ShoppingList) {
+    fun ShoppingListRow(shoppingList: LocalShoppingList) {
         Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primary).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(shoppingList.name, color = Color.White)
             Text("Date: ${shoppingList.date}" , color = Color.White)
-            Text("${shoppingList.list.size} Items", color = Color.White)
         }
 
     }

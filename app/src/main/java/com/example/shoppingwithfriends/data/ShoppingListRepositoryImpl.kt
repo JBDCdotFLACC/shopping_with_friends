@@ -1,17 +1,16 @@
 package com.example.shoppingwithfriends.data
 
-import com.example.shoppingwithfriends.models.ShoppingList
-import com.example.shoppingwithfriends.models.ShoppingListItem
+import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
+import com.example.shoppingwithfriends.data.source.local.ShoppingDao
 import javax.inject.Inject
 
-class ShoppingListRepositoryImpl @Inject constructor() : ShoppingListRepository {
-    override suspend fun getListsForUser(userId: Int): List<ShoppingList> {
-        //For now this is just getting all the shoppingLists
-
+class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource: ShoppingDao) : ShoppingListRepository {
+    override suspend fun getListsForUser(userId: Int): List<LocalShoppingList> {
+        return localDataSource.getShoppingLists()
     }
 
     override suspend fun addNewShoppingList(
-        shoppingList: ShoppingList,
+        shoppingList: LocalShoppingList,
         userId: Int
     ) {
         TODO("Not yet implemented")
@@ -21,12 +20,12 @@ class ShoppingListRepositoryImpl @Inject constructor() : ShoppingListRepository 
         TODO("Not yet implemented")
     }
 
-    override suspend fun getShoppingList(shoppingListId: Int): ShoppingList {
+    override suspend fun getShoppingList(shoppingListId: Int): LocalShoppingList {
         TODO("Not yet implemented")
     }
 
     override suspend fun setShoppingListItemCheck(
-        shoppingListItem: ShoppingListItem,
+        shoppingListItem: String,
         isChecked: Boolean
     ) {
         TODO("Not yet implemented")
