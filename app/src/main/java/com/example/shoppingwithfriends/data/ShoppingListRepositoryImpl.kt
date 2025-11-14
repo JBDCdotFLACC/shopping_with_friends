@@ -5,7 +5,7 @@ import com.example.shoppingwithfriends.models.ShoppingListItem
 import javax.inject.Inject
 
 class ShoppingListRepositoryImpl @Inject constructor() : ShoppingListRepository {
-    override suspend fun getListsForUser(userId: Int): List<ShoppingList> {
+    override suspend fun getListsForUser(userId: String): List<ShoppingList> {
         //For now this is just getting all the shoppingLists
 
     }
@@ -30,5 +30,13 @@ class ShoppingListRepositoryImpl @Inject constructor() : ShoppingListRepository 
         isChecked: Boolean
     ) {
         TODO("Not yet implemented")
+    }
+
+    fun unPackProduct(){
+
+    }
+
+    fun unPackShoppingList(){
+
     }
 }

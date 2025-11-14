@@ -6,7 +6,7 @@ import java.util.Date
 import javax.inject.Inject
 
 class ShoppingListRepositoryFakeImpl @Inject constructor() : ShoppingListRepository {
-    override suspend fun getListsForUser(userId: Int): List<ShoppingList> {
+    override suspend fun getListsForUser(userId: String): List<ShoppingList> {
         return fakeShoppingLists
     }
 

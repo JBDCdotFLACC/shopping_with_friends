@@ -12,4 +12,5 @@ data class LocalShoppingList (
     val id: String,
     var name: String,
     var date: Long,
+    var owner: String,
 )
