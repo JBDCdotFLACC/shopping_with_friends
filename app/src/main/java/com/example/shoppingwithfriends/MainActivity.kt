@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
+import com.example.shoppingwithfriends.features.add_list.AddListComposables
 import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables
 import com.example.shoppingwithfriends.features.login.LoginScreenComposables
 import com.example.shoppingwithfriends.ui.theme.ShoppingWithFriendsTheme
@@ -49,10 +50,13 @@ class MainActivity : ComponentActivity() {
                         LoginScreen({backStack.add(Home)})
                     }
                     is Home -> NavEntry(key) {
-                        HomeScreenComposables.HomeRoute()
+                        HomeScreenComposables.HomeRoute(goToAddList = {backStack.add(AddList)})
                     }
                     is List -> NavEntry(key){
 
+                    }
+                    is AddList -> NavEntry(key){
+                        AddListComposables.AddListRoute()
                     }
                     else -> NavEntry(Unit) { Text("Unknown route") }
                 }
@@ -63,3 +67,4 @@ class MainActivity : ComponentActivity() {
 data object Login
 data object Home
 data object List
+data object AddList

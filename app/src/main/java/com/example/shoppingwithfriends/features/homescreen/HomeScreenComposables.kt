@@ -1,5 +1,6 @@
 package com.example.shoppingwithfriends.features.homescreen
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,19 +30,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.shoppingwithfriends.R
 import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
 import com.example.shoppingwithfriends.features.common.CommonComposables.AppScaffold
-import com.example.shoppingwithfriends.models.ShoppingList
 import com.example.shoppingwithfriends.viewmodels.HomeScreenViewModel
 
 
 object HomeScreenComposables {
     @Composable
-    fun HomeRoute(vm : HomeScreenViewModel = hiltViewModel()){
-        val uiState by vm.state.collectAsStateWithLifecycle()
-        CenterAlignedTopAppBar(uiState)
+    fun HomeRoute(vm : HomeScreenViewModel = hiltViewModel(), goToAddList: () -> Unit){
+        val uiState by vm.state.collectAsState()
+        CenterAlignedTopAppBar(uiState, goToAddList)
     }
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun CenterAlignedTopAppBar(uiState : HomeScreenViewModel.UiState) {
+    fun CenterAlignedTopAppBar(uiState : HomeScreenViewModel.UiState, goToAddList: () -> Unit) {
         AppScaffold(
             title = {
                 Text(
@@ -63,23 +64,23 @@ object HomeScreenComposables {
             when {
                 uiState.isLoading -> Loading(innerPadding)
                 uiState.error != null -> Error(innerPadding)
-                else -> ShoppingListHomeScreen(innerPadding, uiState)
+                else -> ShoppingListHomeScreen(innerPadding, uiState, goToAddList)
             }
         }
     }
 
     @Composable
-    fun ShoppingListHomeScreen(innerPadding: PaddingValues, uiState: HomeScreenViewModel.UiState){
+    fun ShoppingListHomeScreen(innerPadding: PaddingValues, uiState: HomeScreenViewModel.UiState, goToAddList: () -> Unit){
         Column(Modifier.padding(innerPadding)) {
             ShoppingListLists(innerPadding, uiState)
-            AddListButton(innerPadding)
+            AddListButton(innerPadding, goToAddList)
         }
 
     }
 
     @Composable
-    fun AddListButton(innerPadding: PaddingValues) {
-        Button(onClick = { }, modifier = Modifier.padding(innerPadding)) {
+    fun AddListButton(innerPadding: PaddingValues, goToAddList: () -> Unit) {
+        Button(onClick = {goToAddList() }, modifier = Modifier.padding(innerPadding)) {
             Text("Add new list")
         }
     }

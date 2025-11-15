@@ -1,5 +1,6 @@
 package com.example.shoppingwithfriends.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.shoppingwithfriends.data.ShoppingListRepository
@@ -23,13 +24,22 @@ class HomeScreenViewModel @Inject constructor(private val repo: ShoppingListRepo
     val state: StateFlow<UiState> = _state
 
     init {
+        Log.d("HomeVM", "init VM ${this.hashCode()}")
         refresh()
     }
 
     fun refresh() = viewModelScope.launch {
         _state.update { it.copy(isLoading = true, error = null) }
-        runCatching { repo.getListsForUser(1) }        // suspend fun; can be offline-first
-            .onSuccess { list -> _state.update { it.copy(isLoading = false, items = list) } }
-            .onFailure { e -> _state.update { it.copy(isLoading = false, error = e.message) } }
+        runCatching { repo.getListsForUser("1") }        // suspend fun; can be offline-first
+            .onSuccess { list -> _state.update { val newState = it.copy(isLoading = false, items = list)
+                Log.d("HomeVM", "after success: $newState")
+                newState }
+            Log.i("wxyz", "Success")
+            }
+            .onFailure { e -> _state.update { val newState = it.copy(isLoading = false, error = e.message)
+                Log.d("HomeVM", "after failure: $newState")
+                newState }
+                Log.i("wxyz", "Failure")
+            }
     }
 }
