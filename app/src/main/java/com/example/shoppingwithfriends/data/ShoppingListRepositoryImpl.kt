@@ -13,10 +13,9 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
     }
 
     override suspend fun addNewShoppingList(
-        shoppingList: LocalShoppingList,
-        userId: String
+        shoppingList: LocalShoppingList
     ) {
-        TODO("Not yet implemented")
+        localDataSource.insertShoppingList(shoppingList)
     }
 
     override suspend fun addFriendToShoppingList(shoppingListId: String, friendId: String) {

@@ -1,4 +1,4 @@
-package com.example.shoppingwithfriends.viewmodels
+package com.example.shoppingwithfriends.features.homescreen
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
