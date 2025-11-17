@@ -16,18 +16,24 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.shoppingwithfriends.R
 import com.example.shoppingwithfriends.features.common.CommonComposables.AppScaffold
+import com.example.shoppingwithfriends.viewmodels.AddListViewModel
 
 object AddListComposables {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun AddListRoute(){
+    fun AddListRoute(vm : AddListViewModel = hiltViewModel(), goToHome: () -> Unit){
         AppScaffold(
             title = {
                 Text(
@@ -50,10 +56,14 @@ object AddListComposables {
             Column(Modifier.padding(innerPadding)) {
                 Row {
                     Text("List Name")
-                    TextField(value = "", onValueChange = {}, modifier = Modifier.fillMaxWidth())
+                    TextField(value = vm.listName, onValueChange = {vm.onListNameChanged(it)}, modifier = Modifier.fillMaxWidth())
                 }
                 Row {
-                    Button(onClick = {}) { }
+                    Button(onClick = {
+                        goToHome()
+                    }) {
+                        Text("Create List")
+                    }
                 }
             }
         }

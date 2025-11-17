@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
 
                     }
                     is AddList -> NavEntry(key){
-                        AddListComposables.AddListRoute()
+                        AddListComposables.AddListRoute(goToHome = {backStack.removeLastOrNull()})
                     }
                     else -> NavEntry(Unit) { Text("Unknown route") }
                 }
