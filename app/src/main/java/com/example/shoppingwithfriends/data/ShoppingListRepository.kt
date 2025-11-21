@@ -10,4 +10,5 @@ interface ShoppingListRepository {
     suspend fun getShoppingList(shoppingListId : String) : LocalShoppingList
     suspend fun setProductCheck(productId: String, isChecked: Boolean)
     suspend fun getProdcut(productId: String) : LocalProduct
+    suspend fun getProductList(shoppingListId : String) : List<LocalProduct>
 }

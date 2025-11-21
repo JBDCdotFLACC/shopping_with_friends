@@ -15,8 +15,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.ui.NavDisplay
 import com.example.shoppingwithfriends.features.add_list.AddListComposables
+import com.example.shoppingwithfriends.features.edit_list.EditListComposables
 import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables
 import com.example.shoppingwithfriends.features.login.LoginScreenComposables
 import com.example.shoppingwithfriends.ui.theme.ShoppingWithFriendsTheme
@@ -56,7 +58,12 @@ class MainActivity : ComponentActivity() {
 
                     }
                     is AddList -> NavEntry(key){
-                        AddListComposables.AddListRoute(goToHome = {backStack.removeLastOrNull()})
+                        AddListComposables.AddListRoute(goToList = { id ->
+                            backStack.add(EditList(id))
+                        })
+                    }
+                    is EditList -> NavEntry(key){
+                        EditListComposables.EditListRoute(listId = key.listId)
                     }
                     else -> NavEntry(Unit) { Text("Unknown route") }
                 }
@@ -68,3 +75,4 @@ data object Login
 data object Home
 data object List
 data object AddList
+data class EditList(val listId: String) : NavKey

@@ -1,10 +1,9 @@
-package com.example.shoppingwithfriends.features.homescreen
+package com.example.shoppingwithfriends.features.edit_list
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.shoppingwithfriends.data.ShoppingListRepository
-import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
+import com.example.shoppingwithfriends.data.source.local.LocalProduct
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,24 +12,20 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class HomeScreenViewModel @Inject constructor(private val repo: ShoppingListRepository): ViewModel() {
+class EditListViewModel @Inject constructor(private val repo: ShoppingListRepository): ViewModel() {
     data class UiState(
         val isLoading: Boolean = false,
-        val items: List<LocalShoppingList> = emptyList(),
+        val items: List<LocalProduct> = emptyList(),
         val error: String? = null
     )
 
     private val _state = MutableStateFlow(UiState(isLoading = true))
     val state: StateFlow<UiState> = _state
 
-    init {
-        Log.d("HomeVM", "init VM ${this.hashCode()}")
-        refresh()
-    }
 
-    fun refresh() = viewModelScope.launch {
+    fun refresh(shoppingListId : String) = viewModelScope.launch {
         _state.update { it.copy(isLoading = true, error = null) }
-        runCatching { repo.getListsForUser("1") }        // suspend fun; can be offline-first
+        runCatching { repo.getProductList(shoppingListId) }
             .onSuccess { list -> _state.update { val newState = it.copy(isLoading = false, items = list)
                 newState }
             }

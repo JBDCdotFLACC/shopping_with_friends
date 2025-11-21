@@ -20,6 +20,6 @@ interface ShoppingDao {
     suspend fun getShoppingLists(): List<LocalShoppingList>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertShoppingList(vararg shoppingList: LocalShoppingList)
+    suspend fun insertShoppingList(vararg shoppingList: LocalShoppingList)
 
 }

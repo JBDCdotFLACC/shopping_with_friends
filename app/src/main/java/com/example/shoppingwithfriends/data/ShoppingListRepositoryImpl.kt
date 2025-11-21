@@ -36,4 +36,8 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
     override suspend fun getProdcut(productId: String): LocalProduct {
         TODO("Not yet implemented")
     }
+
+    override suspend fun getProductList(shoppingListId: String): List<LocalProduct> {
+        return localDataSource.getProductList(shoppingListId)
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.shoppingwithfriends.features.homescreen
 
-import android.util.Log
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,11 +27,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.shoppingwithfriends.R
 import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
 import com.example.shoppingwithfriends.features.common.CommonComposables.AppScaffold
-import com.example.shoppingwithfriends.features.homescreen.HomeScreenViewModel
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 
 object HomeScreenComposables {
@@ -85,6 +87,7 @@ object HomeScreenComposables {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun ShoppingListLists(innerPadding: PaddingValues, uiState: HomeScreenViewModel.UiState){
         LazyColumn(modifier = Modifier.padding(innerPadding),
@@ -105,12 +108,18 @@ object HomeScreenComposables {
         Text("Is Error", modifier = Modifier.padding(innerPadding))
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun ShoppingListRow(shoppingList: LocalShoppingList) {
+        val formattedDate = Instant.ofEpochMilli(shoppingList.date)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+            .format(DateTimeFormatter.ofPattern("MMM d, yyyy"))
         Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primary).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(shoppingList.name, color = Color.White)
-            Text("Date: ${shoppingList.date}" , color = Color.White)
+            Text("Date: $formattedDate" , color = Color.White)
+            //TODO onclick
         }
 
     }
