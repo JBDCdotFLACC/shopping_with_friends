@@ -6,6 +6,8 @@ import com.example.shoppingwithfriends.data.ShoppingListRepository
 import com.example.shoppingwithfriends.data.source.local.LocalProduct
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -16,21 +18,51 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
     data class UiState(
         val isLoading: Boolean = false,
         val items: List<LocalProduct> = emptyList(),
-        val error: String? = null
+        val error: String? = null,
+        val listName: String = ""
     )
 
     private val _state = MutableStateFlow(UiState(isLoading = true))
     val state: StateFlow<UiState> = _state
 
+    fun onListNameChanged(newValue: String) {
+        _state.update { it.copy(listName = newValue) }
+    }
+
 
     fun refresh(shoppingListId : String) = viewModelScope.launch {
         _state.update { it.copy(isLoading = true, error = null) }
-        runCatching { repo.getProductList(shoppingListId) }
-            .onSuccess { list -> _state.update { val newState = it.copy(isLoading = false, items = list)
-                newState }
+
+        val result = runCatching {
+            coroutineScope {
+                val listDeferred = async { repo.getShoppingList(shoppingListId) }
+                val productsDeferred = async { repo.getProductList(shoppingListId) }
+
+                val shoppingList = listDeferred.await()
+                val products = productsDeferred.await()
+
+                shoppingList to products
             }
-            .onFailure { e -> _state.update { val newState = it.copy(isLoading = false, error = e.message)
-                newState }
+        }
+
+        result
+            .onSuccess { (shoppingList, products) ->
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        listName = shoppingList.name,
+                        items = products,
+                        error = null
+                    )
+                }
+            }
+            .onFailure { e ->
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = e.message
+                    )
+                }
             }
     }
 }
