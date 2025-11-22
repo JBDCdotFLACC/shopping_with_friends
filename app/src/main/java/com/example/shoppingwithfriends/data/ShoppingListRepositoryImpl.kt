@@ -1,6 +1,5 @@
 package com.example.shoppingwithfriends.data
 
-import android.util.Log
 import com.example.shoppingwithfriends.data.source.local.LocalProduct
 import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
 import com.example.shoppingwithfriends.data.source.local.ShoppingDao
@@ -8,7 +7,7 @@ import javax.inject.Inject
 
 class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource: ShoppingDao) : ShoppingListRepository {
     override suspend fun getListsForUser(userId: String): List<LocalShoppingList> {
-        val x = localDataSource.getShoppingLists()
+        val x = localDataSource.getAllShoppingLists()
         return x
     }
 
@@ -23,7 +22,7 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
     }
 
     override suspend fun getShoppingList(shoppingListId: String): LocalShoppingList {
-        TODO("Not yet implemented")
+        return localDataSource.getShoppingList(shoppingListId)
     }
 
     override suspend fun setProductCheck(

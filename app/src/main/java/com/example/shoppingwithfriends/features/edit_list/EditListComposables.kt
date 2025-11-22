@@ -1,7 +1,9 @@
 package com.example.shoppingwithfriends.features.edit_list
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
@@ -17,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.room.util.TableInfo
 import com.example.shoppingwithfriends.R
 import com.example.shoppingwithfriends.features.common.CommonComposables.AppScaffold
 import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables.Error
@@ -56,16 +59,17 @@ object EditListComposables {
             when {
                 uiState.isLoading -> Loading(innerPadding)
                 uiState.error != null -> Error(innerPadding)
-                else -> EditListScreen(Modifier.fillMaxSize(), uiState, vm)
+                else -> EditListScreen(Modifier.fillMaxSize().padding(paddingValues = innerPadding), uiState, vm)
             }
         }
     }
 
     @Composable
     fun EditListScreen(modifier: Modifier, uiState : EditListViewModel.UiState, vm : EditListViewModel){
-        TextField(value = uiState.listName,
-            onValueChange = {vm.onListNameChanged(it)},
-            modifier = Modifier.fillMaxWidth())
+        Column(modifier = modifier) {
+            TextField(value = uiState.listName,
+                onValueChange = {vm.onListNameChanged(it)},
+                modifier = Modifier.fillMaxWidth())
+        }
     }
-
 }

@@ -3,6 +3,7 @@ package com.example.shoppingwithfriends.features.homescreen
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -37,13 +38,15 @@ import java.time.format.DateTimeFormatter
 
 object HomeScreenComposables {
     @Composable
-    fun HomeRoute(vm : HomeScreenViewModel = hiltViewModel(), goToAddList: () -> Unit){
+    fun HomeRoute(vm : HomeScreenViewModel = hiltViewModel(),
+                  goToAddList: () -> Unit,
+                  goToEditList: (id : String) -> Unit){
         val uiState by vm.state.collectAsState()
-        CenterAlignedTopAppBar(uiState, goToAddList)
+        CenterAlignedTopAppBar(uiState, goToAddList, goToEditList)
     }
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun CenterAlignedTopAppBar(uiState : HomeScreenViewModel.UiState, goToAddList: () -> Unit) {
+    fun CenterAlignedTopAppBar(uiState : HomeScreenViewModel.UiState, goToAddList: () -> Unit, goToEditList: (String) -> Unit) {
         AppScaffold(
             title = {
                 Text(
@@ -66,15 +69,18 @@ object HomeScreenComposables {
             when {
                 uiState.isLoading -> Loading(innerPadding)
                 uiState.error != null -> Error(innerPadding)
-                else -> ShoppingListHomeScreen(innerPadding, uiState, goToAddList)
+                else -> ShoppingListHomeScreen(innerPadding, uiState, goToAddList, goToEditList)
             }
         }
     }
 
     @Composable
-    fun ShoppingListHomeScreen(innerPadding: PaddingValues, uiState: HomeScreenViewModel.UiState, goToAddList: () -> Unit){
+    fun ShoppingListHomeScreen(innerPadding: PaddingValues,
+                               uiState: HomeScreenViewModel.UiState,
+                               goToAddList: () -> Unit,
+                               goToEditList: (String) -> Unit){
         Column(Modifier.padding(innerPadding)) {
-            ShoppingListLists(innerPadding, uiState)
+            ShoppingListLists(innerPadding, uiState, goToEditList)
             AddListButton(innerPadding, goToAddList)
         }
 
@@ -89,11 +95,13 @@ object HomeScreenComposables {
 
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
-    fun ShoppingListLists(innerPadding: PaddingValues, uiState: HomeScreenViewModel.UiState){
+    fun ShoppingListLists(innerPadding: PaddingValues,
+                          uiState: HomeScreenViewModel.UiState,
+                          goToEditList: (String) -> Unit){
         LazyColumn(modifier = Modifier.padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(16.dp),) {
             items(uiState.items.size) { item ->
-                ShoppingListRow(uiState.items[item])
+                ShoppingListRow(uiState.items[item], goToEditList)
             }
         }
     }
@@ -110,16 +118,20 @@ object HomeScreenComposables {
 
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
-    fun ShoppingListRow(shoppingList: LocalShoppingList) {
+    fun ShoppingListRow(shoppingList: LocalShoppingList, goToEditList: (String) -> Unit) {
         val formattedDate = Instant.ofEpochMilli(shoppingList.date)
             .atZone(ZoneId.systemDefault())
             .toLocalDate()
             .format(DateTimeFormatter.ofPattern("MMM d, yyyy"))
-        Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primary).padding(16.dp),
+        Column(Modifier.fillMaxSize()
+            .background(MaterialTheme.colorScheme.primary)
+            .padding(16.dp)
+            .clickable(true){
+            goToEditList(shoppingList.id)
+        },
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(shoppingList.name, color = Color.White)
             Text("Date: $formattedDate" , color = Color.White)
-            //TODO onclick
         }
 
     }

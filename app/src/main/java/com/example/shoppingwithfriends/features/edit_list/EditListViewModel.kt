@@ -1,5 +1,6 @@
 package com.example.shoppingwithfriends.features.edit_list
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.shoppingwithfriends.data.ShoppingListRepository
@@ -58,6 +59,7 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
             }
             .onFailure { e ->
                 _state.update {
+                    Log.i("wxyz", e.toString())
                     it.copy(
                         isLoading = false,
                         error = e.message

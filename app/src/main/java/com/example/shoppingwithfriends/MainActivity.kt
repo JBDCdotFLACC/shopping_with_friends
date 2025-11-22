@@ -52,7 +52,8 @@ class MainActivity : ComponentActivity() {
                         LoginScreen({backStack.add(Home)})
                     }
                     is Home -> NavEntry(key) {
-                        HomeScreenComposables.HomeRoute(goToAddList = {backStack.add(AddList)})
+                        HomeScreenComposables.HomeRoute(goToAddList = {backStack.add(AddList)},
+                            goToEditList = {id -> backStack.add(EditList(id))})
                     }
                     is List -> NavEntry(key){
 
