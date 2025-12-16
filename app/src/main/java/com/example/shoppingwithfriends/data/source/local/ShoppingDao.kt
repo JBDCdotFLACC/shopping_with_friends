@@ -17,12 +17,15 @@ interface ShoppingDao {
     suspend fun deleteById(productId: String): Int
 
     @Query(value = "SELECT * FROM shopping_list")
-    suspend fun getShoppingLists(): List<LocalShoppingList>
+    suspend fun getAllShoppingLists(): List<LocalShoppingList>
 
     @Query(value = "SELECT * FROM shopping_list WHERE id = :listId")
     suspend fun getShoppingList(listId : String) : LocalShoppingList
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertShoppingList(vararg shoppingList: LocalShoppingList)
+    suspend fun insertShoppingList(vararg shoppingList: LocalShoppingList)
+
+    @Query(value = "SELECT * FROM shopping_list WHERE id = :shoppingListId")
+    suspend fun getShoppingList(shoppingListId : String) : LocalShoppingList
 
 }

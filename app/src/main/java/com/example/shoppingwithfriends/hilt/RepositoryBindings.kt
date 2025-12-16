@@ -1,7 +1,7 @@
 package com.example.shoppingwithfriends.hilt
 
 import com.example.shoppingwithfriends.data.ShoppingListRepository
-import com.example.shoppingwithfriends.data.ShoppingListRepositoryFakeImpl
+import com.example.shoppingwithfriends.data.ShoppingListRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -13,5 +13,5 @@ import jakarta.inject.Singleton
 abstract class RepositoryBindings {
     @Binds
     @Singleton
-    abstract fun bindRepo(impl: ShoppingListRepositoryFakeImpl): ShoppingListRepository
+    abstract fun bindRepo(impl: ShoppingListRepositoryImpl): ShoppingListRepository
 }

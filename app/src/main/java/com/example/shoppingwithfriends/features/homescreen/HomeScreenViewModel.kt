@@ -1,10 +1,10 @@
-package com.example.shoppingwithfriends.viewmodels
+package com.example.shoppingwithfriends.features.homescreen
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.shoppingwithfriends.data.ShoppingListRepository
-import com.example.shoppingwithfriends.models.ShoppingList
+import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 class HomeScreenViewModel @Inject constructor(private val repo: ShoppingListRepository): ViewModel() {
     data class UiState(
         val isLoading: Boolean = false,
-        val items: List<ShoppingList> = emptyList(),
+        val items: List<LocalShoppingList> = emptyList(),
         val error: String? = null
     )
 
@@ -24,13 +24,18 @@ class HomeScreenViewModel @Inject constructor(private val repo: ShoppingListRepo
     val state: StateFlow<UiState> = _state
 
     init {
+        Log.d("HomeVM", "init VM ${this.hashCode()}")
         refresh()
     }
 
     fun refresh() = viewModelScope.launch {
         _state.update { it.copy(isLoading = true, error = null) }
-        runCatching { repo.getListsForUser(1) }        // suspend fun; can be offline-first
-            .onSuccess { list -> _state.update { it.copy(isLoading = false, items = list) } }
-            .onFailure { e -> _state.update { it.copy(isLoading = false, error = e.message) } }
+        runCatching { repo.getListsForUser("1") }        // suspend fun; can be offline-first
+            .onSuccess { list -> _state.update { val newState = it.copy(isLoading = false, items = list)
+                newState }
+            }
+            .onFailure { e -> _state.update { val newState = it.copy(isLoading = false, error = e.message)
+                newState }
+            }
     }
 }

@@ -1,42 +1,42 @@
 package com.example.shoppingwithfriends.data
 
-import com.example.shoppingwithfriends.models.ShoppingList
-import com.example.shoppingwithfriends.models.ShoppingListItem
+import com.example.shoppingwithfriends.data.source.local.LocalProduct
+import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
+import com.example.shoppingwithfriends.data.source.local.ShoppingDao
 import javax.inject.Inject
 
-class ShoppingListRepositoryImpl @Inject constructor() : ShoppingListRepository {
-    override suspend fun getListsForUser(userId: String): List<ShoppingList> {
-        //For now this is just getting all the shoppingLists
-
+class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource: ShoppingDao) : ShoppingListRepository {
+    override suspend fun getListsForUser(userId: String): List<LocalShoppingList> {
+        val x = localDataSource.getAllShoppingLists()
+        return x
     }
 
     override suspend fun addNewShoppingList(
-        shoppingList: ShoppingList,
-        userId: Int
+        shoppingList: LocalShoppingList
     ) {
+        localDataSource.insertShoppingList(shoppingList)
+    }
+
+    override suspend fun addFriendToShoppingList(shoppingListId: String, friendId: String) {
         TODO("Not yet implemented")
     }
 
-    override suspend fun addFriendToShoppingList(shoppingListId: Int, friendId: Int) {
-        TODO("Not yet implemented")
+    override suspend fun getShoppingList(shoppingListId: String): LocalShoppingList {
+        return localDataSource.getShoppingList(shoppingListId)
     }
 
-    override suspend fun getShoppingList(shoppingListId: Int): ShoppingList {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun setShoppingListItemCheck(
-        shoppingListItem: ShoppingListItem,
+    override suspend fun setProductCheck(
+        productId: String,
         isChecked: Boolean
     ) {
         TODO("Not yet implemented")
     }
 
-    fun unPackProduct(){
-
+    override suspend fun getProdcut(productId: String): LocalProduct {
+        TODO("Not yet implemented")
     }
 
-    fun unPackShoppingList(){
-
+    override suspend fun getProductList(shoppingListId: String): List<LocalProduct> {
+        return localDataSource.getProductList(shoppingListId)
     }
 }

@@ -1,12 +1,14 @@
 package com.example.shoppingwithfriends.data
 
-import com.example.shoppingwithfriends.models.ShoppingList
-import com.example.shoppingwithfriends.models.ShoppingListItem
+import com.example.shoppingwithfriends.data.source.local.LocalProduct
+import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
 
 interface ShoppingListRepository {
-    suspend fun getListsForUser(userId : String) : List<ShoppingList>
-    suspend fun addNewShoppingList(shoppingList : ShoppingList, userId : Int)
-    suspend fun addFriendToShoppingList(shoppingListId : Int, friendId : Int)
-    suspend fun getShoppingList(shoppingListId : Int) : ShoppingList
-    suspend fun setShoppingListItemCheck(shoppingListItem: ShoppingListItem, isChecked: Boolean)
+    suspend fun getListsForUser(userId : String) : List<LocalShoppingList>
+    suspend fun addNewShoppingList(shoppingList : LocalShoppingList)
+    suspend fun addFriendToShoppingList(shoppingListId : String, friendId : String)
+    suspend fun getShoppingList(shoppingListId : String) : LocalShoppingList
+    suspend fun setProductCheck(productId: String, isChecked: Boolean)
+    suspend fun getProdcut(productId: String) : LocalProduct
+    suspend fun getProductList(shoppingListId : String) : List<LocalProduct>
 }

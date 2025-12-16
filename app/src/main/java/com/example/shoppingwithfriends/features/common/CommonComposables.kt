@@ -18,13 +18,7 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
-import com.example.shoppingwithfriends.R
-import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables.Error
-import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables.Loading
-import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables.ShoppingListHomeScreen
-import com.example.shoppingwithfriends.viewmodels.HomeScreenViewModel
+
 
 object CommonComposables {
 
