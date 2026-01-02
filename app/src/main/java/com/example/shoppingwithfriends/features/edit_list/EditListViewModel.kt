@@ -12,6 +12,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -31,6 +32,11 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
         _state.update { it.copy(listName = newValue) }
     }
 
+    fun onPause() {
+        viewModelScope.launch {
+            repo.updateListName(state.value.listId, state.value.listName)
+        }
+    }
 
     fun refresh(shoppingListId : String) = viewModelScope.launch {
         _state.update { it.copy(isLoading = true, error = null) }

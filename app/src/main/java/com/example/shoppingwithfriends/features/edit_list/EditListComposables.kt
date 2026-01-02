@@ -1,5 +1,6 @@
 package com.example.shoppingwithfriends.features.edit_list
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,19 +9,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.room.util.TableInfo
 import com.example.shoppingwithfriends.R
 import com.example.shoppingwithfriends.features.common.CommonComposables.AppScaffold
@@ -35,6 +42,11 @@ object EditListComposables {
             vm.refresh(listId)
         }
         val uiState by vm.state.collectAsState()
+        DisposableEffect(Unit) {
+            onDispose {
+                vm.onPause()   // e.g. save title, commit edits, etc.
+            }
+        }
         CenterAlignedTopAppBar(uiState, vm)
     }
 
@@ -73,7 +85,8 @@ object EditListComposables {
         Column(modifier = modifier) {
             TextField(value = uiState.listName,
                 onValueChange = {vm.onListNameChanged(it)},
-                modifier = Modifier.fillMaxWidth())
+                modifier = Modifier.fillMaxWidth().onFocusChanged({if (!it.hasFocus) vm.onPause()}))
+            TextField(value = "", onValueChange = {})
         }
     }
 
