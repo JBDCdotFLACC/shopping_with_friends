@@ -1,6 +1,7 @@
 package com.example.shoppingwithfriends.features.edit_list
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,6 +14,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -29,7 +31,9 @@ import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables
 object EditListComposables {
     @Composable
     fun EditListRoute(vm : EditListViewModel = hiltViewModel(), listId : String){
-        vm.refresh(listId)
+        LaunchedEffect(listId){
+            vm.refresh(listId)
+        }
         val uiState by vm.state.collectAsState()
         CenterAlignedTopAppBar(uiState, vm)
     }
@@ -70,6 +74,13 @@ object EditListComposables {
             TextField(value = uiState.listName,
                 onValueChange = {vm.onListNameChanged(it)},
                 modifier = Modifier.fillMaxWidth())
+        }
+    }
+
+    @Composable
+    fun ProductRow(modifier: Modifier){
+        Row(modifier = modifier){
+
         }
     }
 }

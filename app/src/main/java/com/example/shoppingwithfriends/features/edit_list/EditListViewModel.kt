@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 class EditListViewModel @Inject constructor(private val repo: ShoppingListRepository): ViewModel() {
     data class UiState(
         val isLoading: Boolean = false,
+        val listId: String = "",
         val items: List<LocalProduct> = emptyList(),
         val error: String? = null,
         val listName: String = ""
@@ -33,7 +34,7 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
 
     fun refresh(shoppingListId : String) = viewModelScope.launch {
         _state.update { it.copy(isLoading = true, error = null) }
-
+        Log.i("wxyz", "We are refreshing....")
         val result = runCatching {
             coroutineScope {
                 val listDeferred = async { repo.getShoppingList(shoppingListId) }
@@ -53,6 +54,7 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
                         isLoading = false,
                         listName = shoppingList.name,
                         items = products,
+                        listId = shoppingListId,
                         error = null
                     )
                 }

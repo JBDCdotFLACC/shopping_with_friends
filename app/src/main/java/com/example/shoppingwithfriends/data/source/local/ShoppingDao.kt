@@ -13,6 +13,9 @@ interface ShoppingDao {
     @Query("UPDATE product SET isChecked = :checked WHERE id = :productId")
     suspend fun updateCompleted(productId: String, checked: Boolean)
 
+    @Query("UPDATE shopping_list SET name = :newName WHERE id = :listId")
+    suspend fun updateListName(listId: String, newName: String)
+
     @Query("DELETE FROM product WHERE id = :productId")
     suspend fun deleteById(productId: String): Int
 
