@@ -1,0 +1,21 @@
+* [33mab11fbe[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mrescue-lost[m[33m)[m Got it loading the title correctly
+* [33mc76088a[m Edit list now loads title
+* [33m784a4d2[m Added edit list viewmodel
+* [33mc150131[m refactored, add list submit
+* [33m2fae6c9[m added addlist viewmodel
+* [33m8b7457d[m Able to navigate to add list
+* [33mb9afbaa[m removed fake repository
+[31m|[m * [33m8c72beb[m[33m ([m[1;32mmaster[m[33m)[m revert
+[31m|[m[31m/[m  
+* [33m9e0ccac[m Added Room
+* [33m2da0675[m Added Room dependencies
+* [33md6b2af4[m we can see the list of lists
+* [33m99f0f5f[m Added Hilt.  Added fake repository
+* [33m0599d27[m Added stuff
+* [33m080c1ee[m Added appbar and models
+* [33mb580de6[m sneakernet
+* [33m321e3f7[m moved login screen composable to it's own file
+* [33m27efa79[m Updated libaries to correct versions
+* [33m0a2aef5[m added libraries for navigation
+* [33m11a8aac[m Login Screen Complete
+* [33m79b4a52[m Initial commit
