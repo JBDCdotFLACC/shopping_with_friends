@@ -32,6 +32,10 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
         TODO("Not yet implemented")
     }
 
+    override suspend fun deleteProduct(productId: String) {
+        localDataSource.deleteById(productId)
+    }
+
     override suspend fun updateListName(shoppingListId: String, newName: String) {
         localDataSource.updateListName(shoppingListId, newName)
     }

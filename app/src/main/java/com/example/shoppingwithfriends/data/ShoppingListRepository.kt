@@ -12,4 +12,5 @@ interface ShoppingListRepository {
     suspend fun getProdcut(productId: String) : LocalProduct
     suspend fun getProductList(shoppingListId : String) : List<LocalProduct>
     suspend fun updateListName(shoppingListId: String, newName: String)
+    suspend fun deleteProduct(productId: String)
 }

@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,6 +31,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.room.util.TableInfo
 import com.example.shoppingwithfriends.R
+import com.example.shoppingwithfriends.data.source.local.LocalProduct
 import com.example.shoppingwithfriends.features.common.CommonComposables.AppScaffold
 import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables.Error
 import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables.Loading
@@ -47,12 +49,16 @@ object EditListComposables {
                 vm.onPause()   // e.g. save title, commit edits, etc.
             }
         }
-        CenterAlignedTopAppBar(uiState, vm)
+        CenterAlignedTopAppBar(uiState = uiState,
+            onListNameChanged = vm::onListNameChanged,
+            onCommitTitleChange = vm::onPause)
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun CenterAlignedTopAppBar(uiState : EditListViewModel.UiState, vm: EditListViewModel) {
+    fun CenterAlignedTopAppBar(uiState : EditListViewModel.UiState,
+                               onListNameChanged: (String) -> Unit,
+                               onCommitTitleChange: () -> Unit) {
         AppScaffold(
             title = {
                 Text(
@@ -75,25 +81,40 @@ object EditListComposables {
             when {
                 uiState.isLoading -> Loading(innerPadding)
                 uiState.error != null -> Error(innerPadding)
-                else -> EditListScreen(Modifier.fillMaxSize().padding(paddingValues = innerPadding), uiState, vm)
+                else -> EditListScreen(modifier = Modifier.fillMaxSize().padding(paddingValues = innerPadding),
+                    uiState = uiState,
+                    onListNameChanged = onListNameChanged,
+                    onCommitTitleChange = onCommitTitleChange)
             }
         }
     }
 
     @Composable
-    fun EditListScreen(modifier: Modifier, uiState : EditListViewModel.UiState, vm : EditListViewModel){
+    fun EditListScreen(modifier: Modifier,
+                       uiState : EditListViewModel.UiState,
+                       onListNameChanged: (String) -> Unit,
+                       onCommitTitleChange : () -> Unit){
         Column(modifier = modifier) {
-            TextField(value = uiState.listName,
-                onValueChange = {vm.onListNameChanged(it)},
-                modifier = Modifier.fillMaxWidth().onFocusChanged({if (!it.hasFocus) vm.onPause()}))
-            TextField(value = "", onValueChange = {})
+        ListNameField(modifier, uiState, onListNameChanged, onCommitTitleChange)
         }
     }
 
     @Composable
-    fun ProductRow(modifier: Modifier){
+    fun ProductRow(modifier: Modifier, product: LocalProduct){
         Row(modifier = modifier){
-
+           // Checkbox(isChecked)
         }
+    }
+
+    @Composable
+    fun ListNameField(modifier: Modifier,
+                      uiState : EditListViewModel.UiState,
+                      onListNameChanged: (String) -> Unit,
+                      onCommitTitleChange: () -> Unit){
+        TextField(value = uiState.listName,
+            onValueChange = {onListNameChanged(it)},
+            modifier = modifier.fillMaxWidth().onFocusChanged({if (!it.hasFocus) onCommitTitleChange()}))
+        TextField(value = "", onValueChange = {})
+
     }
 }

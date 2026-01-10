@@ -12,7 +12,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -20,7 +19,7 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
     data class UiState(
         val isLoading: Boolean = false,
         val listId: String = "",
-        val items: List<LocalProduct> = emptyList(),
+        val products: List<LocalProduct> = emptyList(),
         val error: String? = null,
         val listName: String = ""
     )
@@ -30,6 +29,29 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
 
     fun onListNameChanged(newValue: String) {
         _state.update { it.copy(listName = newValue) }
+    }
+
+    fun onCheckedChanged(id: String, checked: Boolean) {
+        _state.update { state ->
+            state.copy(
+                products = state.products.map { product ->
+                    if (product.id == id) {
+                        product.copy(isChecked = checked)
+                    } else {
+                        product
+                    }
+                }
+            )
+        }
+    }
+
+    fun deleteProduct(id: String){
+        _state.update { state ->
+            state.copy(
+                products = state.products.filter { product -> product.id != id }
+            )
+        }
+        viewModelScope.launch { repo.deleteProduct(id) }
     }
 
     fun onPause() {
@@ -59,7 +81,7 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
                     it.copy(
                         isLoading = false,
                         listName = shoppingList.name,
-                        items = products,
+                        products = products,
                         listId = shoppingListId,
                         error = null
                     )
