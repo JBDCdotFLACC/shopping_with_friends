@@ -48,11 +48,15 @@ object EditListComposables {
         LaunchedEffect(listId){
             vm.refresh(listId)
         }
-        val uiState by vm.state.collectAsState()
-        val products by vm.products.collectAsStateWithLifecycle(emptyList())
+        val uiState by vm.state.collectAsStateWithLifecycle(
+            minActiveState = Lifecycle.State.CREATED
+        )
+        val products by vm.products.collectAsStateWithLifecycle(
+            minActiveState = Lifecycle.State.CREATED
+        )
         DisposableEffect(Unit) {
             onDispose {
-                vm.onPause()   // e.g. save title, commit edits, etc.
+                vm.onPause()
             }
         }
         CenterAlignedTopAppBar(uiState = uiState,
@@ -112,7 +116,7 @@ object EditListComposables {
         Column(modifier = modifier.wrapContentHeight()) {
             Log.i("wxyz", products.size.toString())
             ListNameField(uiState, onListNameChanged, onCommitTitleChange)
-            LazyColumn {
+            LazyColumn( modifier = Modifier.weight(1f)) {
                 items(products.size) { key ->
                     ProductRow(products[key])
                 }

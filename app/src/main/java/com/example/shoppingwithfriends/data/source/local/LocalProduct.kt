@@ -12,4 +12,4 @@ data class LocalProduct (
     var content: String,
     var parent: String,
     var isChecked: Boolean,
-    )
+)

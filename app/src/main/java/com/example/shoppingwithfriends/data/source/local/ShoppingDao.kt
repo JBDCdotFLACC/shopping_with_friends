@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ShoppingDao {
-    @Query("SELECT * FROM product WHERE id = :listId")
+    @Query("SELECT * FROM product WHERE parent = :listId")
     fun getProductList(listId: String): Flow<List<LocalProduct>>
 
     @Query("UPDATE product SET isChecked = :checked WHERE id = :productId")

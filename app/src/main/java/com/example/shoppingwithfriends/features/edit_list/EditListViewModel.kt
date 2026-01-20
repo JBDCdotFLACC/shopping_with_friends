@@ -12,6 +12,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -57,17 +58,15 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
     }
 
     fun addItem(){
-        Log.i("wxyz", "adding an item")
         viewModelScope.launch {
             val newId = UUID.randomUUID().toString()
             repo.addProduct(LocalProduct(
-                newId, "",
-                state.value.listId,
+                newId, newId,
+                _listId.value ?: return@launch,
                 false))
+            Log.d("wxyz", "products now = ${products.value.size}")
         }
     }
-
-
 
     fun onPause() {
         viewModelScope.launch {
@@ -75,20 +74,12 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
         }
     }
 
-    fun refresh(shoppingListId : String) = viewModelScope.launch {
-        _listId.update { shoppingListId }
+    fun refresh(shoppingListId: String) = viewModelScope.launch {
+        _listId.value = shoppingListId
         _state.update { it.copy(isLoading = true, error = null) }
-        val result = runCatching {
-            coroutineScope {
-                val listDeferred = async { repo.getShoppingList(shoppingListId) }
-                val shoppingList = listDeferred.await()
-                val products = repo.getProductList(shoppingListId)
-                shoppingList to products
-            }
-        }
 
-        result
-            .onSuccess { (shoppingList, products) ->
+        runCatching { repo.getShoppingList(shoppingListId) }
+            .onSuccess { shoppingList ->
                 _state.update {
                     it.copy(
                         isLoading = false,
@@ -99,12 +90,7 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
                 }
             }
             .onFailure { e ->
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        error = e.message
-                    )
-                }
+                _state.update { it.copy(isLoading = false, error = e.message) }
             }
     }
 }
