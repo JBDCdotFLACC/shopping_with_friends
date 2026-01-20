@@ -14,4 +14,5 @@ interface ShoppingListRepository {
     fun getProductList(shoppingListId : String) : Flow<List<LocalProduct>>
     suspend fun updateListName(shoppingListId: String, newName: String)
     suspend fun deleteProduct(productId: String)
+    suspend fun addProduct(product : LocalProduct)
 }

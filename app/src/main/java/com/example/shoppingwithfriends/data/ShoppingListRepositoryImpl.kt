@@ -1,5 +1,6 @@
 package com.example.shoppingwithfriends.data
 
+import android.util.Log
 import com.example.shoppingwithfriends.data.source.local.LocalProduct
 import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
 import com.example.shoppingwithfriends.data.source.local.ShoppingDao
@@ -46,6 +47,13 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
     }
 
     override fun getProductList(shoppingListId: String): Flow<List<LocalProduct>> {
+        Log.i("wxyz", "Getting shoppingList")
+        Log.i("wxyz", shoppingListId)
         return localDataSource.getProductList(shoppingListId)
+    }
+
+    override suspend fun addProduct(product: LocalProduct) {
+        Log.i("wxyz", product.toString())
+        localDataSource.insertProduct(product)
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
@@ -32,6 +33,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.room.util.TableInfo
 import com.example.shoppingwithfriends.R
 import com.example.shoppingwithfriends.data.source.local.LocalProduct
@@ -47,6 +49,7 @@ object EditListComposables {
             vm.refresh(listId)
         }
         val uiState by vm.state.collectAsState()
+        val products by vm.products.collectAsStateWithLifecycle(emptyList())
         DisposableEffect(Unit) {
             onDispose {
                 vm.onPause()   // e.g. save title, commit edits, etc.
@@ -54,14 +57,18 @@ object EditListComposables {
         }
         CenterAlignedTopAppBar(uiState = uiState,
             onListNameChanged = vm::onListNameChanged,
-            onCommitTitleChange = vm::onPause)
+            onCommitTitleChange = vm::onPause,
+            onAddItem = vm::addItem,
+            products = products)
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun CenterAlignedTopAppBar(uiState : EditListViewModel.UiState,
                                onListNameChanged: (String) -> Unit,
-                               onCommitTitleChange: () -> Unit) {
+                               onCommitTitleChange: () -> Unit,
+                               onAddItem: () -> Unit,
+                               products : List<LocalProduct>) {
         AppScaffold(
             title = {
                 Text(
@@ -81,14 +88,15 @@ object EditListComposables {
                 }
             },
         ) { innerPadding ->
-            Log.i("wxyz", innerPadding.toString())
             when {
                 uiState.isLoading -> Loading(innerPadding)
                 uiState.error != null -> Error(innerPadding)
                 else -> {EditListScreen(modifier = Modifier.padding(paddingValues = innerPadding),
                     uiState = uiState,
                     onListNameChanged = onListNameChanged,
-                    onCommitTitleChange = onCommitTitleChange)
+                    onCommitTitleChange = onCommitTitleChange,
+                    onAddItem = onAddItem,
+                    products = products)
                 }
             }
         }
@@ -98,17 +106,34 @@ object EditListComposables {
     fun EditListScreen(modifier: Modifier,
                        uiState : EditListViewModel.UiState,
                        onListNameChanged: (String) -> Unit,
-                       onCommitTitleChange : () -> Unit){
+                       onCommitTitleChange : () -> Unit,
+                       onAddItem : () -> Unit,
+                       products : List<LocalProduct>){
         Column(modifier = modifier.wrapContentHeight()) {
-        ListNameField(uiState, onListNameChanged, onCommitTitleChange)
+            Log.i("wxyz", products.size.toString())
+            ListNameField(uiState, onListNameChanged, onCommitTitleChange)
+            LazyColumn {
+                items(products.size) { key ->
+                    ProductRow(products[key])
+                }
+            }
+            AddItemButton(onAddItem)
         }
     }
 
     @Composable
-    fun ProductRow(modifier: Modifier, product: LocalProduct){
-        Row(modifier = modifier){
-           // Checkbox(isChecked)
+    fun ProductRow(product : LocalProduct){
+        Row(modifier = Modifier){
+           Text("test")
         }
+    }
+
+    @Composable
+    fun AddItemButton(onClick : () -> Unit){
+        Button(onClick = onClick){
+            Text("Add a List")
+        }
+
     }
 
     @Composable
@@ -120,7 +145,7 @@ object EditListComposables {
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .onFocusChanged({if (!it.hasFocus) onCommitTitleChange()}))
+                .onFocusChanged({ if (!it.hasFocus) onCommitTitleChange() }))
 
     }
 }
