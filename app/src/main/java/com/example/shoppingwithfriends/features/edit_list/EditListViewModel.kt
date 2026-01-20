@@ -9,6 +9,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -16,10 +17,12 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class EditListViewModel @Inject constructor(private val repo: ShoppingListRepository): ViewModel() {
+
+    var products: Flow<List<LocalProduct>> = repo.getProductList("id")
+
     data class UiState(
         val isLoading: Boolean = false,
         val listId: String = "",
-        val products: List<LocalProduct> = emptyList(),
         val error: String? = null,
         val listName: String = ""
     )
@@ -31,28 +34,7 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
         _state.update { it.copy(listName = newValue) }
     }
 
-    fun onCheckedChanged(id: String, checked: Boolean) {
-        _state.update { state ->
-            state.copy(
-                products = state.products.map { product ->
-                    if (product.id == id) {
-                        product.copy(isChecked = checked)
-                    } else {
-                        product
-                    }
-                }
-            )
-        }
-    }
 
-    fun deleteProduct(id: String){
-        _state.update { state ->
-            state.copy(
-                products = state.products.filter { product -> product.id != id }
-            )
-        }
-        viewModelScope.launch { repo.deleteProduct(id) }
-    }
 
     fun onPause() {
         viewModelScope.launch {
@@ -62,15 +44,11 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
 
     fun refresh(shoppingListId : String) = viewModelScope.launch {
         _state.update { it.copy(isLoading = true, error = null) }
-        Log.i("wxyz", "We are refreshing....")
         val result = runCatching {
             coroutineScope {
                 val listDeferred = async { repo.getShoppingList(shoppingListId) }
-                val productsDeferred = async { repo.getProductList(shoppingListId) }
-
                 val shoppingList = listDeferred.await()
-                val products = productsDeferred.await()
-
+                val products = repo.getProductList(shoppingListId)
                 shoppingList to products
             }
         }
@@ -81,7 +59,6 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
                     it.copy(
                         isLoading = false,
                         listName = shoppingList.name,
-                        products = products,
                         listId = shoppingListId,
                         error = null
                     )
@@ -89,7 +66,6 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
             }
             .onFailure { e ->
                 _state.update {
-                    Log.i("wxyz", e.toString())
                     it.copy(
                         isLoading = false,
                         error = e.message

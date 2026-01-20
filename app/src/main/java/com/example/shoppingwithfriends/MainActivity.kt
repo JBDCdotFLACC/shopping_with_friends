@@ -29,12 +29,9 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             ShoppingWithFriendsTheme {
-                Scaffold(modifier = Modifier.fillMaxSize().background(color = Color.White)) { innerPadding ->
                     MyApp()
-                }
             }
         }
     }

@@ -4,11 +4,12 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ShoppingDao {
     @Query("SELECT * FROM product WHERE id = :listId")
-    suspend fun getProductList(listId: String): List<LocalProduct>
+    fun getProductList(listId: String): Flow<List<LocalProduct>>
 
     @Query("UPDATE product SET isChecked = :checked WHERE id = :productId")
     suspend fun updateCompleted(productId: String, checked: Boolean)

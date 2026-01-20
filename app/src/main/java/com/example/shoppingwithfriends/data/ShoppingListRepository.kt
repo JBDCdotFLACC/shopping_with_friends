@@ -2,6 +2,7 @@ package com.example.shoppingwithfriends.data
 
 import com.example.shoppingwithfriends.data.source.local.LocalProduct
 import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
+import kotlinx.coroutines.flow.Flow
 
 interface ShoppingListRepository {
     suspend fun getListsForUser(userId : String) : List<LocalShoppingList>
@@ -10,7 +11,7 @@ interface ShoppingListRepository {
     suspend fun getShoppingList(shoppingListId : String) : LocalShoppingList
     suspend fun setProductCheck(productId: String, isChecked: Boolean)
     suspend fun getProdcut(productId: String) : LocalProduct
-    suspend fun getProductList(shoppingListId : String) : List<LocalProduct>
+    fun getProductList(shoppingListId : String) : Flow<List<LocalProduct>>
     suspend fun updateListName(shoppingListId: String, newName: String)
     suspend fun deleteProduct(productId: String)
 }

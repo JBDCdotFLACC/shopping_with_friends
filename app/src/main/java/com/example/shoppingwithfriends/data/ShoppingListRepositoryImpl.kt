@@ -3,6 +3,7 @@ package com.example.shoppingwithfriends.data
 import com.example.shoppingwithfriends.data.source.local.LocalProduct
 import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
 import com.example.shoppingwithfriends.data.source.local.ShoppingDao
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource: ShoppingDao) : ShoppingListRepository {
@@ -44,7 +45,7 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
         TODO("Not yet implemented")
     }
 
-    override suspend fun getProductList(shoppingListId: String): List<LocalProduct> {
+    override fun getProductList(shoppingListId: String): Flow<List<LocalProduct>> {
         return localDataSource.getProductList(shoppingListId)
     }
 }

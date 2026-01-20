@@ -3,9 +3,11 @@ package com.example.shoppingwithfriends.features.edit_list
 import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
@@ -25,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -76,15 +79,17 @@ object EditListComposables {
                 IconButton(onClick = { /* open menu */ }) {
                     Icon(Icons.Filled.Menu, contentDescription = "Menu")
                 }
-            }
+            },
         ) { innerPadding ->
+            Log.i("wxyz", innerPadding.toString())
             when {
                 uiState.isLoading -> Loading(innerPadding)
                 uiState.error != null -> Error(innerPadding)
-                else -> EditListScreen(modifier = Modifier.fillMaxSize().padding(paddingValues = innerPadding),
+                else -> {EditListScreen(modifier = Modifier.padding(paddingValues = innerPadding),
                     uiState = uiState,
                     onListNameChanged = onListNameChanged,
                     onCommitTitleChange = onCommitTitleChange)
+                }
             }
         }
     }
@@ -94,8 +99,8 @@ object EditListComposables {
                        uiState : EditListViewModel.UiState,
                        onListNameChanged: (String) -> Unit,
                        onCommitTitleChange : () -> Unit){
-        Column(modifier = modifier) {
-        ListNameField(modifier, uiState, onListNameChanged, onCommitTitleChange)
+        Column(modifier = modifier.wrapContentHeight()) {
+        ListNameField(uiState, onListNameChanged, onCommitTitleChange)
         }
     }
 
@@ -107,14 +112,15 @@ object EditListComposables {
     }
 
     @Composable
-    fun ListNameField(modifier: Modifier,
-                      uiState : EditListViewModel.UiState,
+    fun ListNameField(uiState : EditListViewModel.UiState,
                       onListNameChanged: (String) -> Unit,
                       onCommitTitleChange: () -> Unit){
         TextField(value = uiState.listName,
             onValueChange = {onListNameChanged(it)},
-            modifier = modifier.fillMaxWidth().onFocusChanged({if (!it.hasFocus) onCommitTitleChange()}))
-        TextField(value = "", onValueChange = {})
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .onFocusChanged({if (!it.hasFocus) onCommitTitleChange()}))
 
     }
 }
