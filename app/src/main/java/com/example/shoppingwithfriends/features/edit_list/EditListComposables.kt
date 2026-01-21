@@ -1,6 +1,7 @@
 package com.example.shoppingwithfriends.features.edit_list
 
 import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -13,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -22,8 +24,10 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
@@ -43,6 +47,14 @@ import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables
 
 
 object EditListComposables {
+    @Stable
+    data class EditListActions(
+        val onListNameChanged: (String) -> Unit,
+        val onCommitTitleChange: () -> Unit,
+        val onAddItem: () -> Unit,
+        val onProductCheckedChanged: (Boolean, String) -> Unit,
+    )
+
     @Composable
     fun EditListRoute(vm : EditListViewModel = hiltViewModel(), listId : String){
         LaunchedEffect(listId){
@@ -59,19 +71,25 @@ object EditListComposables {
                 vm.onPause()
             }
         }
+
+        val actions = remember(vm) {
+            EditListActions(
+                onListNameChanged = vm::onListNameChanged,
+                onCommitTitleChange = vm::onPause,
+                onAddItem = vm::addItem,
+                onProductCheckedChanged = vm::onCheckChanged,
+            )
+        }
+
         CenterAlignedTopAppBar(uiState = uiState,
-            onListNameChanged = vm::onListNameChanged,
-            onCommitTitleChange = vm::onPause,
-            onAddItem = vm::addItem,
+            actions = actions,
             products = products)
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun CenterAlignedTopAppBar(uiState : EditListViewModel.UiState,
-                               onListNameChanged: (String) -> Unit,
-                               onCommitTitleChange: () -> Unit,
-                               onAddItem: () -> Unit,
+                               actions: EditListActions,
                                products : List<LocalProduct>) {
         AppScaffold(
             title = {
@@ -96,10 +114,8 @@ object EditListComposables {
                 uiState.isLoading -> Loading(innerPadding)
                 uiState.error != null -> Error(innerPadding)
                 else -> {EditListScreen(modifier = Modifier.padding(paddingValues = innerPadding),
+                    actions = actions,
                     uiState = uiState,
-                    onListNameChanged = onListNameChanged,
-                    onCommitTitleChange = onCommitTitleChange,
-                    onAddItem = onAddItem,
                     products = products)
                 }
             }
@@ -108,27 +124,30 @@ object EditListComposables {
 
     @Composable
     fun EditListScreen(modifier: Modifier,
+                       actions: EditListActions,
                        uiState : EditListViewModel.UiState,
-                       onListNameChanged: (String) -> Unit,
-                       onCommitTitleChange : () -> Unit,
-                       onAddItem : () -> Unit,
                        products : List<LocalProduct>){
         Column(modifier = modifier.wrapContentHeight()) {
-            Log.i("wxyz", products.size.toString())
-            ListNameField(uiState, onListNameChanged, onCommitTitleChange)
-            LazyColumn( modifier = Modifier.weight(1f)) {
+            ListNameField(uiState, actions = actions)
+            LazyColumn( modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 items(products.size) { key ->
-                    ProductRow(products[key])
+                    ProductRow(products[key], actions)
                 }
             }
-            AddItemButton(onAddItem)
+            AddItemButton(actions.onAddItem)
         }
     }
 
     @Composable
-    fun ProductRow(product : LocalProduct){
-        Row(modifier = Modifier){
-           Text("test")
+    fun ProductRow(product : LocalProduct, actions : EditListActions){
+        Card{
+            Row(modifier = Modifier){
+                Checkbox(checked = product.isChecked,
+                    onCheckedChange = { isChecked ->
+                        actions.onProductCheckedChanged(isChecked, product.id)
+                })
+            }
         }
     }
 
@@ -142,14 +161,12 @@ object EditListComposables {
 
     @Composable
     fun ListNameField(uiState : EditListViewModel.UiState,
-                      onListNameChanged: (String) -> Unit,
-                      onCommitTitleChange: () -> Unit){
+                      actions: EditListActions){
         TextField(value = uiState.listName,
-            onValueChange = {onListNameChanged(it)},
+            onValueChange = {actions.onListNameChanged(it)},
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .onFocusChanged({ if (!it.hasFocus) onCommitTitleChange() }))
-
+                .onFocusChanged { if (!it.hasFocus) actions.onCommitTitleChange() })
     }
 }

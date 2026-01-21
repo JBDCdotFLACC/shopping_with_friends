@@ -57,6 +57,12 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
         _state.update { it.copy(listName = newValue) }
     }
 
+    fun onCheckChanged(isChecked : Boolean, productId : String){
+        viewModelScope.launch {
+            repo.setProductCheck(productId, isChecked)
+        }
+    }
+
     fun addItem(){
         viewModelScope.launch {
             val newId = UUID.randomUUID().toString()
