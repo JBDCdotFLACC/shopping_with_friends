@@ -61,7 +61,8 @@ object EditListComposables {
         val onCommitTitleChange: () -> Unit,
         val onAddItem: () -> Unit,
         val onProductCheckedChanged: (String, Boolean) -> Unit,
-        val onProductNameChanged: (String, String) -> Unit
+        val onProductNameChanged: (String, String) -> Unit,
+        val onDeleteProduct: (String) -> Unit
     )
 
     @Composable
@@ -87,7 +88,8 @@ object EditListComposables {
                 onCommitTitleChange = vm::onPause,
                 onAddItem = vm::addItem,
                 onProductCheckedChanged = vm::onCheckChanged,
-                onProductNameChanged = vm::onProductNameChanged
+                onProductNameChanged = vm::onProductNameChanged,
+                onDeleteProduct = vm::deleteProduct
             )
         }
 
@@ -179,7 +181,7 @@ object EditListComposables {
                         }
                     }
                     )
-                IconButton(onClick = { /* open menu */ }) {
+                IconButton(onClick = {actions.onDeleteProduct(product.id)}) {
                     Icon(Icons.Filled.Delete, contentDescription = "Menu")
                 }
 
