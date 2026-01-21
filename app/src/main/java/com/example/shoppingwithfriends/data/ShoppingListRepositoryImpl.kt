@@ -42,18 +42,15 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
         localDataSource.updateListName(shoppingListId, newName)
     }
 
-    override suspend fun getProdcut(productId: String): LocalProduct {
-        TODO("Not yet implemented")
+    override suspend fun updateProductName(productId: String, newName: String) {
+        localDataSource.updateProductName(productId, newName)
     }
 
     override fun getProductList(shoppingListId: String): Flow<List<LocalProduct>> {
-        Log.i("wxyz", "Getting shoppingList")
-        Log.i("wxyz", shoppingListId)
         return localDataSource.getProductList(shoppingListId)
     }
 
     override suspend fun addProduct(product: LocalProduct) {
-        Log.i("wxyz", product.toString())
         localDataSource.insertProduct(product)
     }
 }

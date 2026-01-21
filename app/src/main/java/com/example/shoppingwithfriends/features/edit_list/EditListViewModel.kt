@@ -57,9 +57,21 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
         _state.update { it.copy(listName = newValue) }
     }
 
-    fun onCheckChanged(isChecked : Boolean, productId : String){
+    fun onCheckChanged(productId : String, isChecked : Boolean){
         viewModelScope.launch {
             repo.setProductCheck(productId, isChecked)
+        }
+    }
+
+    fun onProductNameChanged(productId: String, name : String){
+        viewModelScope.launch {
+            repo.updateProductName(productId, newName = name)
+        }
+    }
+
+    fun deleteProduct(productId: String){
+        viewModelScope.launch {
+            repo.deleteProduct(productId)
         }
     }
 
@@ -67,10 +79,10 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
         viewModelScope.launch {
             val newId = UUID.randomUUID().toString()
             repo.addProduct(LocalProduct(
-                newId, newId,
-                _listId.value ?: return@launch,
-                false))
-            Log.d("wxyz", "products now = ${products.value.size}")
+                id = newId,
+                content = "",
+                parent =_listId.value ?: return@launch,
+                isChecked = false))
         }
     }
 

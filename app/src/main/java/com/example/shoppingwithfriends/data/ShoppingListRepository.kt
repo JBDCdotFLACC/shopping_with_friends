@@ -10,9 +10,9 @@ interface ShoppingListRepository {
     suspend fun addFriendToShoppingList(shoppingListId : String, friendId : String)
     suspend fun getShoppingList(shoppingListId : String) : LocalShoppingList
     suspend fun setProductCheck(productId: String, isChecked: Boolean)
-    suspend fun getProdcut(productId: String) : LocalProduct
     fun getProductList(shoppingListId : String) : Flow<List<LocalProduct>>
     suspend fun updateListName(shoppingListId: String, newName: String)
     suspend fun deleteProduct(productId: String)
     suspend fun addProduct(product : LocalProduct)
+    suspend fun updateProductName(productId: String, newName : String)
 }

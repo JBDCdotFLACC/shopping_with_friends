@@ -1,6 +1,7 @@
 package com.example.shoppingwithfriends.features.edit_list
 
 import android.util.Log
+import android.widget.ImageButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
@@ -19,6 +22,8 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -27,7 +32,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
@@ -52,7 +60,8 @@ object EditListComposables {
         val onListNameChanged: (String) -> Unit,
         val onCommitTitleChange: () -> Unit,
         val onAddItem: () -> Unit,
-        val onProductCheckedChanged: (Boolean, String) -> Unit,
+        val onProductCheckedChanged: (String, Boolean) -> Unit,
+        val onProductNameChanged: (String, String) -> Unit
     )
 
     @Composable
@@ -78,6 +87,7 @@ object EditListComposables {
                 onCommitTitleChange = vm::onPause,
                 onAddItem = vm::addItem,
                 onProductCheckedChanged = vm::onCheckChanged,
+                onProductNameChanged = vm::onProductNameChanged
             )
         }
 
@@ -131,8 +141,8 @@ object EditListComposables {
             ListNameField(uiState, actions = actions)
             LazyColumn( modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                items(products.size) { key ->
-                    ProductRow(products[key], actions)
+                items(items = products, key = { product -> product.id }) { product ->
+                    ProductRow(product = product, actions = actions)
                 }
             }
             AddItemButton(actions.onAddItem)
@@ -141,12 +151,38 @@ object EditListComposables {
 
     @Composable
     fun ProductRow(product : LocalProduct, actions : EditListActions){
-        Card{
-            Row(modifier = Modifier){
+        var text by rememberSaveable(product.id) { mutableStateOf(product.content) }
+        var isEditing by remember(product.id) { mutableStateOf(false) } // I don't want my text to get overwritten if the databse emits while we are editing
+        LaunchedEffect(product.id, product.content, isEditing) {
+            //I don't want the text field to be overwritten if the database emits while we are editing
+            if (!isEditing) text = product.content
+        }
+        OutlinedCard {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp)){
                 Checkbox(checked = product.isChecked,
                     onCheckedChange = { isChecked ->
-                        actions.onProductCheckedChanged(isChecked, product.id)
+                        actions.onProductCheckedChanged(product.id, isChecked)
                 })
+                OutlinedTextField(value = text,
+                    onValueChange = {text = it},
+                    modifier = Modifier.onFocusChanged{
+                        focusState ->
+                        if(focusState.isFocused){
+                            isEditing = true
+                        }
+                        else{
+                            isEditing = false
+                            val trimmed = text.trim()
+                            if(trimmed != product.content) actions.onProductNameChanged(product.id, trimmed)
+                        }
+                    }
+                    )
+                IconButton(onClick = { /* open menu */ }) {
+                    Icon(Icons.Filled.Delete, contentDescription = "Menu")
+                }
+
             }
         }
     }
