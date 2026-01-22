@@ -40,7 +40,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.shoppingwithfriends.R
 import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
-import com.example.shoppingwithfriends.features.add_list.FormEvent
 import com.example.shoppingwithfriends.features.common.CommonComposables.AppScaffold
 import java.time.Instant
 import java.time.ZoneId
