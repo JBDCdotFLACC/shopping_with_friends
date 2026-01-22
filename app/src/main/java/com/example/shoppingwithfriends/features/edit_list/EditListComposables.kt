@@ -45,6 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -56,6 +57,7 @@ import com.example.shoppingwithfriends.data.source.local.LocalProduct
 import com.example.shoppingwithfriends.features.common.CommonComposables.AppScaffold
 import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables.Error
 import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables.Loading
+import androidx.compose.ui.text.TextStyle
 
 
 object EditListComposables {
@@ -151,7 +153,6 @@ object EditListComposables {
                        uiState : EditListViewModel.UiState,
                        products : List<LocalProduct>,
                        focusProductId: String?){
-        Log.i("wxyz", focusProductId.toString())
         Column(modifier = modifier.wrapContentHeight()) {
             ListNameField(uiState, actions = actions)
             LazyColumn( modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
@@ -159,7 +160,8 @@ object EditListComposables {
                 items(items = products, key = { product -> product.id }) { product ->
                     ProductRow(product = product,
                         actions = actions,
-                        focusProductId == product.id)
+                        shouldRequestFocus = focusProductId == product.id,
+                        modifier = Modifier.animateItem())
                 }
             }
             AddItemButton(actions.onAddItem)
@@ -167,7 +169,7 @@ object EditListComposables {
     }
 
     @Composable
-    fun ProductRow(product : LocalProduct, actions : EditListActions, shouldRequestFocus : Boolean){
+    fun ProductRow(product : LocalProduct, actions : EditListActions, shouldRequestFocus : Boolean, modifier : Modifier){
         var text by rememberSaveable(product.id) { mutableStateOf(product.content) }
         var isEditing by rememberSaveable(product.id) { mutableStateOf(false) } // I don't want my text to get overwritten if the databse emits while we are editing
         val focusRequester = remember { FocusRequester() }
@@ -184,7 +186,7 @@ object EditListComposables {
                 actions.onClearFocusRequest()
             }
         }
-        OutlinedCard {
+        OutlinedCard(modifier = modifier) {
             Row(modifier = Modifier
                 .fillMaxWidth()){
                 Checkbox(checked = product.isChecked,
@@ -209,7 +211,8 @@ object EditListComposables {
                             }
                         }
                         .weight(8f)
-                        .focusRequester(focusRequester)
+                        .focusRequester(focusRequester),
+                    textStyle = TextStyle(fontSize = 16.sp)
                     )
                 IconButton(onClick = {actions.onDeleteProduct(product.id)}, Modifier.weight(1f)) {
                     Icon(Icons.Filled.Delete, contentDescription = "Delete button")
@@ -224,7 +227,6 @@ object EditListComposables {
         Button(onClick = onClick){
             Text("Add a List")
         }
-
     }
 
     @Composable
@@ -235,6 +237,7 @@ object EditListComposables {
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .onFocusChanged { if (!it.hasFocus) actions.onCommitTitleChange() })
+                .onFocusChanged { if (!it.hasFocus) actions.onCommitTitleChange() },
+            textStyle = TextStyle(fontSize = 24.sp))
     }
 }
