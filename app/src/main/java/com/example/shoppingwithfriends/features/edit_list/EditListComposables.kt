@@ -2,7 +2,9 @@ package com.example.shoppingwithfriends.features.edit_list
 
 import android.util.Log
 import android.widget.ImageButton
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -58,6 +60,7 @@ import com.example.shoppingwithfriends.features.common.CommonComposables.AppScaf
 import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables.Error
 import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables.Loading
 import androidx.compose.ui.text.TextStyle
+import com.example.shoppingwithfriends.features.common.Constants
 
 
 object EditListComposables {
@@ -186,6 +189,9 @@ object EditListComposables {
                 actions.onClearFocusRequest()
             }
         }
+        LaunchedEffect(isEditing) {
+            if (isEditing) focusRequester.requestFocus()
+        }
         OutlinedCard(modifier = modifier) {
             Row(modifier = Modifier
                 .fillMaxWidth()){
@@ -194,26 +200,39 @@ object EditListComposables {
                     onCheckedChange = { isChecked ->
                         actions.onProductCheckedChanged(product.id, isChecked)
                 })
-                OutlinedTextField(value = text,
-                    singleLine = true,
-                    onValueChange = {text = it},
-                    modifier = Modifier
-                        .onFocusChanged { focusState ->
-                            if (focusState.isFocused) {
-                                isEditing = true
-                            } else {
-                                isEditing = false
-                                val trimmed = text.trim()
-                                if (trimmed != product.content) actions.onProductNameChanged(
-                                    product.id,
-                                    trimmed
-                                )
-                            }
-                        }
-                        .weight(8f)
-                        .focusRequester(focusRequester),
-                    textStyle = TextStyle(fontSize = 16.sp)
-                    )
+                Box(modifier = Modifier.weight(8f)) {
+                    if(isEditing){
+                        OutlinedTextField(value = text,
+                            singleLine = true,
+                            onValueChange = {text = it},
+                            modifier = Modifier
+                                .onFocusChanged { focusState ->
+                                    if (focusState.isFocused) {
+                                        isEditing = true
+                                    } else {
+                                        isEditing = false
+                                        val trimmed = text.trim()
+                                        if (trimmed != product.content) actions.onProductNameChanged(
+                                            product.id,
+                                            trimmed
+                                        )
+                                    }
+                                }
+                                .focusRequester(focusRequester),
+                            textStyle = TextStyle(fontSize = Constants.REGULAR_TEXTSIZE)
+                        )
+                    }
+                    else{
+                        Text(
+                            text = text,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier
+                                .clickable { isEditing = true },
+                            fontSize = Constants.REGULAR_TEXTSIZE
+                        )
+                    }
+                }
                 IconButton(onClick = {actions.onDeleteProduct(product.id)}, Modifier.weight(1f)) {
                     Icon(Icons.Filled.Delete, contentDescription = "Delete button")
                 }
@@ -238,6 +257,6 @@ object EditListComposables {
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .onFocusChanged { if (!it.hasFocus) actions.onCommitTitleChange() },
-            textStyle = TextStyle(fontSize = 24.sp))
+            textStyle = TextStyle(fontSize = Constants.LARGER_TEXTSIZE))
     }
 }

@@ -67,6 +67,9 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
     fun onCheckChanged(productId : String, isChecked : Boolean){
         viewModelScope.launch {
             repo.setProductCheck(productId, isChecked)
+            if(!isChecked){
+                _focusProductId.value = productId
+            }
         }
     }
 
