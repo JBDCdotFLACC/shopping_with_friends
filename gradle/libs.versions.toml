@@ -22,9 +22,12 @@ roomRxjava3 = "2.8.3"
 roomTesting = "2.8.3"
 ui = "1.9.3"
 hilt = "2.57.2"
+material3 = "1.4.0"
+navigation3Runtime = "1.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-room-guava = { module = "androidx.room:room-guava", version.ref = "roomGuava" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "roomPaging" }
@@ -55,6 +58,8 @@ kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version.ref = "material3AdaptiveNav3" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "ui" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompilerVersion" }
+material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runtime", version.ref = "navigation3Runtime" }
 
 
 [plugins]

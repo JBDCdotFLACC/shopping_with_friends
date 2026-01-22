@@ -14,7 +14,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.maxLength
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
@@ -60,6 +64,8 @@ import com.example.shoppingwithfriends.features.common.CommonComposables.AppScaf
 import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables.Error
 import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables.Loading
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextDecoration
 import com.example.shoppingwithfriends.features.common.Constants
 
 
@@ -189,9 +195,6 @@ object EditListComposables {
                 actions.onClearFocusRequest()
             }
         }
-        LaunchedEffect(isEditing) {
-            if (isEditing) focusRequester.requestFocus()
-        }
         OutlinedCard(modifier = modifier) {
             Row(modifier = Modifier
                 .fillMaxWidth()){
@@ -199,40 +202,41 @@ object EditListComposables {
                     modifier = Modifier.weight(1f),
                     onCheckedChange = { isChecked ->
                         actions.onProductCheckedChanged(product.id, isChecked)
-                })
-                Box(modifier = Modifier.weight(8f)) {
-                    if(isEditing){
-                        OutlinedTextField(value = text,
-                            singleLine = true,
-                            onValueChange = {text = it},
-                            modifier = Modifier
-                                .onFocusChanged { focusState ->
-                                    if (focusState.isFocused) {
-                                        isEditing = true
-                                    } else {
-                                        isEditing = false
-                                        val trimmed = text.trim()
-                                        if (trimmed != product.content) actions.onProductNameChanged(
-                                            product.id,
-                                            trimmed
-                                        )
-                                    }
-                                }
-                                .focusRequester(focusRequester),
-                            textStyle = TextStyle(fontSize = Constants.REGULAR_TEXTSIZE)
-                        )
-                    }
-                    else{
-                        Text(
-                            text = text,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier
-                                .clickable { isEditing = true },
-                            fontSize = Constants.REGULAR_TEXTSIZE
-                        )
-                    }
-                }
+                    })
+                OutlinedTextField(value = text,
+                    singleLine = true,
+                    onValueChange = { newValue ->
+                        if (newValue.length <= 256) {
+                            text = newValue
+                        }
+                    },
+                    modifier = Modifier
+                        .onFocusChanged { focusState ->
+                            if (focusState.isFocused) {
+                                isEditing = true
+                            } else {
+                                isEditing = false
+                                val trimmed = text.trim()
+                                if (trimmed != product.content) actions.onProductNameChanged(
+                                    product.id,
+                                    trimmed
+                                )
+                            }
+                        }
+                        .focusRequester(focusRequester)
+                        .weight(8f),
+                    enabled = !product.isChecked,
+                    textStyle = TextStyle(fontSize = Constants.REGULAR_TEXTSIZE,
+                        textDecoration = if(product.isChecked) TextDecoration.LineThrough else TextDecoration.None),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            actions.onAddItem()
+                        }
+                    )
+                )
                 IconButton(onClick = {actions.onDeleteProduct(product.id)}, Modifier.weight(1f)) {
                     Icon(Icons.Filled.Delete, contentDescription = "Delete button")
                 }

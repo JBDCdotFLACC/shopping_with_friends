@@ -43,6 +43,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.material3)
+    implementation(libs.navigation3.runtime)
     val room_version = "2.8.3"
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -77,4 +79,5 @@ dependencies {
     implementation(libs.androidx.room.guava)
     testImplementation(libs.androidx.room.testing)
     implementation(libs.androidx.room.paging)
+    implementation(libs.androidx.material.icons.extended)
 }
