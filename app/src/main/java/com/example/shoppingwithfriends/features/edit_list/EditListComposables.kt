@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.InputTransformation
@@ -41,6 +43,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -162,9 +165,20 @@ object EditListComposables {
                        uiState : EditListViewModel.UiState,
                        products : List<LocalProduct>,
                        focusProductId: String?){
-        Column(modifier = modifier.wrapContentHeight()) {
+        Column(modifier = modifier.wrapContentHeight().imePadding()) {
+            val listState = rememberLazyListState()
+            var previousSize by remember { mutableStateOf(products.size) }
+
+
+            LaunchedEffect(products.size) {
+                if (products.size > previousSize) {
+                    listState.animateScrollToItem(products.lastIndex)
+                }
+                previousSize = products.size
+            }
             ListNameField(uiState, actions = actions)
             LazyColumn( modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
+                state = listState,
                 verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 items(items = products, key = { product -> product.id }) { product ->
                     ProductRow(product = product,
@@ -173,7 +187,7 @@ object EditListComposables {
                         modifier = Modifier.animateItem())
                 }
             }
-            AddItemButton(actions.onAddItem)
+            AddItemButton(actions.onAddItem, Modifier.padding(10.dp))
         }
     }
 
@@ -246,8 +260,8 @@ object EditListComposables {
     }
 
     @Composable
-    fun AddItemButton(onClick : () -> Unit){
-        Button(onClick = onClick){
+    fun AddItemButton(onClick : () -> Unit, modifier : Modifier){
+        Button(onClick = onClick, modifier = modifier){
             Text("Add a List")
         }
     }

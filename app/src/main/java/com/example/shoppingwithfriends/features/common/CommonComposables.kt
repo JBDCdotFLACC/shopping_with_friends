@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
@@ -61,7 +62,6 @@ object CommonComposables {
                 }
 
             },
-            contentWindowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp),
         ) { innerPadding ->
             content(innerPadding)
         }
