@@ -5,7 +5,7 @@ import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
 import kotlinx.coroutines.flow.Flow
 
 interface ShoppingListRepository {
-    suspend fun getListsForUser(userId : String) : List<LocalShoppingList>
+    fun getListsForUser(userId : String) : Flow<List<LocalShoppingList>>
     suspend fun addNewShoppingList(shoppingList : LocalShoppingList)
     suspend fun addFriendToShoppingList(shoppingListId : String, friendId : String)
     suspend fun getShoppingList(shoppingListId : String) : LocalShoppingList

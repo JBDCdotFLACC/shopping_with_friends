@@ -8,9 +8,8 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource: ShoppingDao) : ShoppingListRepository {
-    override suspend fun getListsForUser(userId: String): List<LocalShoppingList> {
-        val x = localDataSource.getAllShoppingLists()
-        return x
+    override fun getListsForUser(userId: String): Flow<List<LocalShoppingList>> {
+        return localDataSource.getAllShoppingLists()
     }
 
     override suspend fun addNewShoppingList(

@@ -24,7 +24,7 @@ interface ShoppingDao {
     suspend fun deleteById(productId: String): Int
 
     @Query(value = "SELECT * FROM shopping_list")
-    suspend fun getAllShoppingLists(): List<LocalShoppingList>
+    fun getAllShoppingLists(): Flow<List<LocalShoppingList>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertShoppingList(vararg shoppingList: LocalShoppingList)

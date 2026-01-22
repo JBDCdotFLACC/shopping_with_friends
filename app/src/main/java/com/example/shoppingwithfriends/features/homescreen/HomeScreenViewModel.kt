@@ -7,8 +7,14 @@ import com.example.shoppingwithfriends.data.ShoppingListRepository
 import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -16,9 +22,24 @@ import kotlinx.coroutines.launch
 class HomeScreenViewModel @Inject constructor(private val repo: ShoppingListRepository): ViewModel() {
     data class UiState(
         val isLoading: Boolean = false,
-        val items: List<LocalShoppingList> = emptyList(),
         val error: String? = null
     )
+
+    private val _userId = MutableStateFlow<String?>(null)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val shoppingLists: StateFlow<List<LocalShoppingList>> =
+        _userId
+            .filterNotNull()
+            .distinctUntilChanged()
+            .flatMapLatest { id : String ->
+                repo.getListsForUser(id)
+            }
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList()
+            )
 
     private val _state = MutableStateFlow(UiState(isLoading = true))
     val state: StateFlow<UiState> = _state
@@ -30,12 +51,14 @@ class HomeScreenViewModel @Inject constructor(private val repo: ShoppingListRepo
 
     fun refresh() = viewModelScope.launch {
         _state.update { it.copy(isLoading = true, error = null) }
-        runCatching { repo.getListsForUser("1") }        // suspend fun; can be offline-first
-            .onSuccess { list -> _state.update { val newState = it.copy(isLoading = false, items = list)
+        _userId.value = "1"
+        runCatching { repo.getListsForUser("1") }
+            .onSuccess { list -> _state.update { val newState = it.copy(isLoading = false)
                 newState }
             }
             .onFailure { e -> _state.update { val newState = it.copy(isLoading = false, error = e.message)
                 newState }
             }
     }
+
 }

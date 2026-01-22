@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
@@ -28,6 +29,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.shoppingwithfriends.R
 import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
 import com.example.shoppingwithfriends.features.common.CommonComposables.AppScaffold
@@ -42,11 +45,17 @@ object HomeScreenComposables {
                   goToAddList: () -> Unit,
                   goToEditList: (id : String) -> Unit){
         val uiState by vm.state.collectAsState()
-        CenterAlignedTopAppBar(uiState, goToAddList, goToEditList)
+        val shoppingLists by vm.shoppingLists.collectAsStateWithLifecycle(
+            minActiveState = Lifecycle.State.CREATED
+        )
+        CenterAlignedTopAppBar(uiState = uiState, shoppingLists, goToAddList, goToEditList)
     }
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun CenterAlignedTopAppBar(uiState : HomeScreenViewModel.UiState, goToAddList: () -> Unit, goToEditList: (String) -> Unit) {
+    fun CenterAlignedTopAppBar(uiState : HomeScreenViewModel.UiState,
+                                shoppingLists: List<LocalShoppingList>,
+                               goToAddList: () -> Unit,
+                               goToEditList: (String) -> Unit) {
         AppScaffold(
             title = {
                 Text(
@@ -69,18 +78,18 @@ object HomeScreenComposables {
             when {
                 uiState.isLoading -> Loading(innerPadding)
                 uiState.error != null -> Error(innerPadding)
-                else -> ShoppingListHomeScreen(innerPadding, uiState, goToAddList, goToEditList)
+                else -> ShoppingListHomeScreen(innerPadding, goToAddList, goToEditList, shoppingLists)
             }
         }
     }
 
     @Composable
     fun ShoppingListHomeScreen(innerPadding: PaddingValues,
-                               uiState: HomeScreenViewModel.UiState,
                                goToAddList: () -> Unit,
-                               goToEditList: (String) -> Unit){
+                               goToEditList: (String) -> Unit,
+                               shoppingLists: List<LocalShoppingList>){
         Column(Modifier.padding(innerPadding)) {
-            ShoppingListLists(innerPadding, uiState, goToEditList)
+            ShoppingListLists(innerPadding, goToEditList, shoppingLists)
             AddListButton(innerPadding, goToAddList)
         }
 
@@ -96,12 +105,12 @@ object HomeScreenComposables {
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun ShoppingListLists(innerPadding: PaddingValues,
-                          uiState: HomeScreenViewModel.UiState,
-                          goToEditList: (String) -> Unit){
+                          goToEditList: (String) -> Unit,
+                          shoppingLists: List<LocalShoppingList>){
         LazyColumn(modifier = Modifier.padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(16.dp),) {
-            items(uiState.items.size) { item ->
-                ShoppingListRow(uiState.items[item], goToEditList)
+            items(items = shoppingLists, key = { shoppingList -> shoppingList.id }) { shoppingList ->
+                ShoppingListRow(shoppingList, goToEditList)
             }
         }
     }

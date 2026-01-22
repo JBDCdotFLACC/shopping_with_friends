@@ -182,7 +182,7 @@ object EditListComposables {
                     }
                     )
                 IconButton(onClick = {actions.onDeleteProduct(product.id)}) {
-                    Icon(Icons.Filled.Delete, contentDescription = "Menu")
+                    Icon(Icons.Filled.Delete, contentDescription = "Delete button")
                 }
 
             }

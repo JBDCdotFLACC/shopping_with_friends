@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -27,7 +28,6 @@ import java.util.UUID
 
 @HiltViewModel
 class EditListViewModel @Inject constructor(private val repo: ShoppingListRepository): ViewModel() {
-
     private val _listId = MutableStateFlow<String?>(null)
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -37,12 +37,14 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
             .distinctUntilChanged()
             .flatMapLatest { id : String ->
                 repo.getProductList(id)
+                    .onStart { emit(emptyList()) }
             }
             .stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(5_000),
                 initialValue = emptyList()
             )
+
     data class UiState(
         val isLoading: Boolean = false,
         val listId: String = "",
@@ -50,7 +52,9 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
         val listName: String = ""
     )
 
-    private val _state = MutableStateFlow(UiState(isLoading = true))
+
+
+    private val _state = MutableStateFlow(UiState(isLoading = false))
     val state: StateFlow<UiState> = _state
 
     fun onListNameChanged(newValue: String) {
@@ -92,23 +96,24 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
         }
     }
 
-    fun refresh(shoppingListId: String) = viewModelScope.launch {
+    fun refresh(shoppingListId: String) {
+        if (_listId.value == shoppingListId) return
         _listId.value = shoppingListId
-        _state.update { it.copy(isLoading = true, error = null) }
 
-        runCatching { repo.getShoppingList(shoppingListId) }
-            .onSuccess { shoppingList ->
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        listName = shoppingList.name,
-                        listId = shoppingListId,
-                        error = null
-                    )
-                }
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null, listId = shoppingListId) }
+
+            val result = runCatching { repo.getShoppingList(shoppingListId) }
+            _state.update { old ->
+                result.fold(
+                    onSuccess = { list ->
+                        old.copy(listName = list.name, isLoading = false, error = null)
+                    },
+                    onFailure = { e ->
+                        old.copy( error = e.message, isLoading = false,)
+                    }
+                )
             }
-            .onFailure { e ->
-                _state.update { it.copy(isLoading = false, error = e.message) }
-            }
+        }
     }
 }
