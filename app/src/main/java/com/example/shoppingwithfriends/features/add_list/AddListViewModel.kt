@@ -39,10 +39,9 @@ class AddListViewModel @Inject constructor(private val repo: ShoppingListReposit
                 repo.addNewShoppingList(LocalShoppingList(
                     newId, listName,
                     Date().time,
-                "1"))
+                    "1"))
                 _events.emit(FormEvent.Success(newId))
             } catch (e: Exception) {
-                Log.i("wxyz", e.message ?: "empty exception")
                 _events.emit(FormEvent.Error("Failed to save"))
             } finally {
                 listName = ""
@@ -51,7 +50,6 @@ class AddListViewModel @Inject constructor(private val repo: ShoppingListReposit
         }
     }
 }
-
 sealed interface FormEvent {
     data class Success(val id: String) : FormEvent
     data class Error(val message: String) : FormEvent

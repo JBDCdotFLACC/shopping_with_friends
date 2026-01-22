@@ -8,15 +8,19 @@ import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Date
+import java.util.UUID
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(private val repo: ShoppingListRepository): ViewModel() {
@@ -26,6 +30,9 @@ class HomeScreenViewModel @Inject constructor(private val repo: ShoppingListRepo
     )
 
     private val _userId = MutableStateFlow<String?>(null)
+
+    private val _events = MutableSharedFlow<AddListEvent>()
+    val events = _events.asSharedFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val shoppingLists: StateFlow<List<LocalShoppingList>> =
@@ -49,6 +56,17 @@ class HomeScreenViewModel @Inject constructor(private val repo: ShoppingListRepo
         refresh()
     }
 
+    fun submit(listName : String) {
+        viewModelScope.launch {
+                val newId = UUID.randomUUID().toString()
+                repo.addNewShoppingList(LocalShoppingList(
+                    newId, listName,
+                    Date().time,
+                    "1"))
+                _events.emit(AddListEvent.Success(newId))
+        }
+    }
+
     fun refresh() = viewModelScope.launch {
         _state.update { it.copy(isLoading = true, error = null) }
         _userId.value = "1"
@@ -60,5 +78,9 @@ class HomeScreenViewModel @Inject constructor(private val repo: ShoppingListRepo
                 newState }
             }
     }
+}
 
+sealed interface AddListEvent {
+    data class Success(val id: String) : AddListEvent
+    data class Error(val message: String) : AddListEvent
 }

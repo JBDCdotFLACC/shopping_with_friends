@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Shopping With Friends</string>
+    <string name="add_item">Add an Item</string>
+    <string name="add_list">Add a new list</string>
+    <string name="name">Name</string>
 </resources>
