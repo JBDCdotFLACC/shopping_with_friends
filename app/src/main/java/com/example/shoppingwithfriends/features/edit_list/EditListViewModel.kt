@@ -30,6 +30,9 @@ import java.util.UUID
 class EditListViewModel @Inject constructor(private val repo: ShoppingListRepository): ViewModel() {
     private val _listId = MutableStateFlow<String?>(null)
 
+    private val _focusProductId = MutableStateFlow<String?>(null)
+    val focusProductId: StateFlow<String?> = _focusProductId
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val products: StateFlow<List<LocalProduct>> =
         _listId
@@ -79,6 +82,10 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
         }
     }
 
+    fun clearFocusRequest() {
+        _focusProductId.value = null
+    }
+
     fun addItem(){
         viewModelScope.launch {
             val newId = UUID.randomUUID().toString()
@@ -87,6 +94,7 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
                 content = "",
                 parent =_listId.value ?: return@launch,
                 isChecked = false))
+            _focusProductId.value = newId
         }
     }
 

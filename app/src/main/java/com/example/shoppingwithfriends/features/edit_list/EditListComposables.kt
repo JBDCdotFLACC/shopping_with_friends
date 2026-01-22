@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
@@ -37,10 +38,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -62,7 +66,8 @@ object EditListComposables {
         val onAddItem: () -> Unit,
         val onProductCheckedChanged: (String, Boolean) -> Unit,
         val onProductNameChanged: (String, String) -> Unit,
-        val onDeleteProduct: (String) -> Unit
+        val onDeleteProduct: (String) -> Unit,
+        val onClearFocusRequest: () -> Unit,
     )
 
     @Composable
@@ -73,6 +78,8 @@ object EditListComposables {
         val uiState by vm.state.collectAsStateWithLifecycle(
             minActiveState = Lifecycle.State.CREATED
         )
+        val focusProductId by vm.focusProductId.collectAsState()
+
         val products by vm.products.collectAsStateWithLifecycle(
             minActiveState = Lifecycle.State.CREATED
         )
@@ -89,20 +96,23 @@ object EditListComposables {
                 onAddItem = vm::addItem,
                 onProductCheckedChanged = vm::onCheckChanged,
                 onProductNameChanged = vm::onProductNameChanged,
-                onDeleteProduct = vm::deleteProduct
+                onDeleteProduct = vm::deleteProduct,
+                onClearFocusRequest = vm::clearFocusRequest
             )
         }
 
         CenterAlignedTopAppBar(uiState = uiState,
             actions = actions,
-            products = products)
+            products = products,
+            focusProductId = focusProductId)
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun CenterAlignedTopAppBar(uiState : EditListViewModel.UiState,
                                actions: EditListActions,
-                               products : List<LocalProduct>) {
+                               products : List<LocalProduct>,
+                               focusProductId : String?) {
         AppScaffold(
             title = {
                 Text(
@@ -128,7 +138,8 @@ object EditListComposables {
                 else -> {EditListScreen(modifier = Modifier.padding(paddingValues = innerPadding),
                     actions = actions,
                     uiState = uiState,
-                    products = products)
+                    products = products,
+                    focusProductId = focusProductId)
                 }
             }
         }
@@ -138,13 +149,17 @@ object EditListComposables {
     fun EditListScreen(modifier: Modifier,
                        actions: EditListActions,
                        uiState : EditListViewModel.UiState,
-                       products : List<LocalProduct>){
+                       products : List<LocalProduct>,
+                       focusProductId: String?){
+        Log.i("wxyz", focusProductId.toString())
         Column(modifier = modifier.wrapContentHeight()) {
             ListNameField(uiState, actions = actions)
-            LazyColumn( modifier = Modifier.weight(1f),
+            LazyColumn( modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 items(items = products, key = { product -> product.id }) { product ->
-                    ProductRow(product = product, actions = actions)
+                    ProductRow(product = product,
+                        actions = actions,
+                        focusProductId == product.id)
                 }
             }
             AddItemButton(actions.onAddItem)
@@ -152,36 +167,51 @@ object EditListComposables {
     }
 
     @Composable
-    fun ProductRow(product : LocalProduct, actions : EditListActions){
+    fun ProductRow(product : LocalProduct, actions : EditListActions, shouldRequestFocus : Boolean){
         var text by rememberSaveable(product.id) { mutableStateOf(product.content) }
-        var isEditing by remember(product.id) { mutableStateOf(false) } // I don't want my text to get overwritten if the databse emits while we are editing
-        LaunchedEffect(product.id, product.content, isEditing) {
-            //I don't want the text field to be overwritten if the database emits while we are editing
-            if (!isEditing) text = product.content
+        var isEditing by rememberSaveable(product.id) { mutableStateOf(false) } // I don't want my text to get overwritten if the databse emits while we are editing
+        val focusRequester = remember { FocusRequester() }
+
+        LaunchedEffect(product.id, product.content) {
+            if (!isEditing && text != product.content) {
+                text = product.content
+            }
+        }
+        LaunchedEffect(shouldRequestFocus) {
+            if (shouldRequestFocus) {
+                isEditing = true
+                focusRequester.requestFocus()
+                actions.onClearFocusRequest()
+            }
         }
         OutlinedCard {
             Row(modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp)){
+                .fillMaxWidth()){
                 Checkbox(checked = product.isChecked,
+                    modifier = Modifier.weight(1f),
                     onCheckedChange = { isChecked ->
                         actions.onProductCheckedChanged(product.id, isChecked)
                 })
                 OutlinedTextField(value = text,
+                    singleLine = true,
                     onValueChange = {text = it},
-                    modifier = Modifier.onFocusChanged{
-                        focusState ->
-                        if(focusState.isFocused){
-                            isEditing = true
+                    modifier = Modifier
+                        .onFocusChanged { focusState ->
+                            if (focusState.isFocused) {
+                                isEditing = true
+                            } else {
+                                isEditing = false
+                                val trimmed = text.trim()
+                                if (trimmed != product.content) actions.onProductNameChanged(
+                                    product.id,
+                                    trimmed
+                                )
+                            }
                         }
-                        else{
-                            isEditing = false
-                            val trimmed = text.trim()
-                            if(trimmed != product.content) actions.onProductNameChanged(product.id, trimmed)
-                        }
-                    }
+                        .weight(8f)
+                        .focusRequester(focusRequester)
                     )
-                IconButton(onClick = {actions.onDeleteProduct(product.id)}) {
+                IconButton(onClick = {actions.onDeleteProduct(product.id)}, Modifier.weight(1f)) {
                     Icon(Icons.Filled.Delete, contentDescription = "Delete button")
                 }
 
