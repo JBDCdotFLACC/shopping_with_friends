@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -102,7 +103,7 @@ object HomeScreenComposables {
             when {
                 uiState.isLoading -> Loading(innerPadding)
                 uiState.error != null -> Error(innerPadding)
-                else -> ShoppingListHomeScreen(innerPadding,
+                else -> ShoppingListHomeScreen(Modifier.padding(innerPadding),
                     goToEditList,
                     shoppingLists,
                     submitFormName,
@@ -112,25 +113,25 @@ object HomeScreenComposables {
     }
 
     @Composable
-    fun ShoppingListHomeScreen(innerPadding: PaddingValues,
+    fun ShoppingListHomeScreen(modifier: Modifier,
                                goToEditList: (String) -> Unit,
                                shoppingLists: List<LocalShoppingList>,
                                submitFormName : (String) -> Unit,
                                deleteShoppingList: (String) -> Unit){
-        Column(Modifier.padding(innerPadding)) {
-            ShoppingListLists(innerPadding, goToEditList, shoppingLists, deleteShoppingList)
-            AddListButton(innerPadding, submitFormName)
+        Column(modifier) {
+            ShoppingListLists( goToEditList, shoppingLists, deleteShoppingList, Modifier.weight(9f))
+            AddListButton( submitFormName, Modifier.weight(1f))
         }
 
     }
 
     @Composable
-    fun AddListButton(innerPadding: PaddingValues, submitFormName : (String) -> Unit) {
+    fun AddListButton(submitFormName : (String) -> Unit, modifier : Modifier) {
         var showDialog by rememberSaveable { mutableStateOf(false) }
 
         Button(onClick = {
             showDialog = true
-        }, modifier = Modifier.padding(innerPadding)) {
+        }, modifier = modifier.padding(2.dp)) {
             Text("Add new list")
         }
         if(showDialog){
@@ -144,14 +145,14 @@ object HomeScreenComposables {
 
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
-    fun ShoppingListLists(innerPadding: PaddingValues,
-                          goToEditList: (String) -> Unit,
+    fun ShoppingListLists(goToEditList: (String) -> Unit,
                           shoppingLists: List<LocalShoppingList>,
-                          deleteShoppingList: (String) -> Unit){
-        LazyColumn(modifier = Modifier.padding(innerPadding),
+                          deleteShoppingList: (String) -> Unit,
+                          modifier: Modifier){
+        LazyColumn(modifier = modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),) {
             items(items = shoppingLists, key = { shoppingList -> shoppingList.id }) { shoppingList ->
-                ShoppingListRow(shoppingList, goToEditList, deleteShoppingList)
+                ShoppingListRow(shoppingList, goToEditList, deleteShoppingList, Modifier.animateItem())
             }
         }
     }
@@ -234,28 +235,31 @@ object HomeScreenComposables {
     @Composable
     fun ShoppingListRow(shoppingList: LocalShoppingList,
                         goToEditList: (String) -> Unit,
-                        deleteShoppingList: (String) -> Unit) {
+                        deleteShoppingList: (String) -> Unit,
+                        modifier: Modifier) {
         val haptics = LocalHapticFeedback.current
         var showDialog by rememberSaveable { mutableStateOf(false) }
         val formattedDate = Instant.ofEpochMilli(shoppingList.date)
             .atZone(ZoneId.systemDefault())
             .toLocalDate()
             .format(DateTimeFormatter.ofPattern("MMM d, yyyy"))
-        Column(Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary)
-            .padding(16.dp)
-            .combinedClickable(
-                onClick = { goToEditList(shoppingList.id) },
-                onLongClick = {
-                    showDialog = true
-                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                }
-            ),
-            verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text(shoppingList.name, color = Color.White)
-            Text("Date: $formattedDate" , color = Color.White)
+        Card{
+            Column(modifier
+                .fillMaxSize()
+                .padding(8.dp)
+                .combinedClickable(
+                    onClick = { goToEditList(shoppingList.id) },
+                    onLongClick = {
+                        showDialog = true
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    }
+                ),
+                verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(shoppingList.name)
+                Text("Date: $formattedDate")
+            }
         }
+
         if(showDialog){
             DeleteListAlertDialog(
                 onConfirm = {id->
