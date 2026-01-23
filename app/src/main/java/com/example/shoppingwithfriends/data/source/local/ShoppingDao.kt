@@ -23,6 +23,12 @@ interface ShoppingDao {
     @Query("DELETE FROM product WHERE id = :productId")
     suspend fun deleteById(productId: String): Int
 
+    @Query("DELETE FROM shopping_list WHERE id = :shoppingListId")
+    suspend fun deleteShoppingList(shoppingListId: String)
+
+    @Query("DELETE FROM product WHERE parent = :shoppingListId")
+    suspend fun deleteProductsFromShoppingList(shoppingListId: String)
+
     @Query(value = "SELECT * FROM shopping_list")
     fun getAllShoppingLists(): Flow<List<LocalShoppingList>>
 

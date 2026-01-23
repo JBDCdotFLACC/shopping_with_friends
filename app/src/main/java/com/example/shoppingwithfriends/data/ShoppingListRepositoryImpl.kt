@@ -52,4 +52,9 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
     override suspend fun addProduct(product: LocalProduct) {
         localDataSource.insertProduct(product)
     }
+
+    override suspend fun deleteList(listId: String) {
+        localDataSource.deleteShoppingList(listId)
+        localDataSource.deleteProductsFromShoppingList(listId)
+    }
 }

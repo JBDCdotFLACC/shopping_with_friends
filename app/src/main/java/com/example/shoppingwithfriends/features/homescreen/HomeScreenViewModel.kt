@@ -67,6 +67,12 @@ class HomeScreenViewModel @Inject constructor(private val repo: ShoppingListRepo
         }
     }
 
+    fun deleteShoppingList(listId : String){
+        viewModelScope.launch {
+            repo.deleteList(listId)
+        }
+    }
+
     fun refresh() = viewModelScope.launch {
         _state.update { it.copy(isLoading = true, error = null) }
         _userId.value = "1"

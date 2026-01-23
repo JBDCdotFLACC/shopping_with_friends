@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,6 +33,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -67,14 +70,16 @@ object HomeScreenComposables {
                 }
             }
         }
-        CenterAlignedTopAppBar(uiState = uiState, shoppingLists, goToEditList, vm::submit)
+        CenterAlignedTopAppBar(uiState = uiState, shoppingLists, goToEditList,
+            vm::submit, vm::deleteShoppingList)
     }
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun CenterAlignedTopAppBar(uiState : HomeScreenViewModel.UiState,
                                 shoppingLists: List<LocalShoppingList>,
                                 goToEditList: (String) -> Unit,
-                                submitFormName : (String) -> Unit) {
+                                submitFormName : (String) -> Unit,
+                               deleteShoppingList: (String) -> Unit) {
         AppScaffold(
             title = {
                 Text(
@@ -97,7 +102,11 @@ object HomeScreenComposables {
             when {
                 uiState.isLoading -> Loading(innerPadding)
                 uiState.error != null -> Error(innerPadding)
-                else -> ShoppingListHomeScreen(innerPadding,  goToEditList, shoppingLists, submitFormName)
+                else -> ShoppingListHomeScreen(innerPadding,
+                    goToEditList,
+                    shoppingLists,
+                    submitFormName,
+                    deleteShoppingList)
             }
         }
     }
@@ -106,9 +115,10 @@ object HomeScreenComposables {
     fun ShoppingListHomeScreen(innerPadding: PaddingValues,
                                goToEditList: (String) -> Unit,
                                shoppingLists: List<LocalShoppingList>,
-                               submitFormName : (String) -> Unit){
+                               submitFormName : (String) -> Unit,
+                               deleteShoppingList: (String) -> Unit){
         Column(Modifier.padding(innerPadding)) {
-            ShoppingListLists(innerPadding, goToEditList, shoppingLists)
+            ShoppingListLists(innerPadding, goToEditList, shoppingLists, deleteShoppingList)
             AddListButton(innerPadding, submitFormName)
         }
 
@@ -136,11 +146,12 @@ object HomeScreenComposables {
     @Composable
     fun ShoppingListLists(innerPadding: PaddingValues,
                           goToEditList: (String) -> Unit,
-                          shoppingLists: List<LocalShoppingList>){
+                          shoppingLists: List<LocalShoppingList>,
+                          deleteShoppingList: (String) -> Unit){
         LazyColumn(modifier = Modifier.padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(16.dp),) {
             items(items = shoppingLists, key = { shoppingList -> shoppingList.id }) { shoppingList ->
-                ShoppingListRow(shoppingList, goToEditList)
+                ShoppingListRow(shoppingList, goToEditList, deleteShoppingList)
             }
         }
     }
@@ -190,9 +201,42 @@ object HomeScreenComposables {
         )
     }
 
+    @Composable
+    fun DeleteListAlertDialog(
+        onConfirm: (String) -> Unit,
+        onDismiss: () -> Unit,
+        shoppingList: LocalShoppingList
+    ) {
+        val message = if(shoppingList.name.isBlank()){
+            "Are you sure you want to delete this list?"
+        }  else {
+            "Are you sure you want to delete the list ${shoppingList.name}?"
+        }
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(message) },
+            confirmButton = {
+                TextButton(
+                    onClick = { onConfirm(shoppingList.id) },
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
-    fun ShoppingListRow(shoppingList: LocalShoppingList, goToEditList: (String) -> Unit) {
+    fun ShoppingListRow(shoppingList: LocalShoppingList,
+                        goToEditList: (String) -> Unit,
+                        deleteShoppingList: (String) -> Unit) {
+        val haptics = LocalHapticFeedback.current
+        var showDialog by rememberSaveable { mutableStateOf(false) }
         val formattedDate = Instant.ofEpochMilli(shoppingList.date)
             .atZone(ZoneId.systemDefault())
             .toLocalDate()
@@ -201,14 +245,24 @@ object HomeScreenComposables {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.primary)
             .padding(16.dp)
-            .clickable(true) {
-                goToEditList(shoppingList.id)
-            },
+            .combinedClickable(
+                onClick = { goToEditList(shoppingList.id) },
+                onLongClick = {
+                    showDialog = true
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                }
+            ),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(shoppingList.name, color = Color.White)
             Text("Date: $formattedDate" , color = Color.White)
         }
-
+        if(showDialog){
+            DeleteListAlertDialog(
+                onConfirm = {id->
+                    deleteShoppingList(id)
+                showDialog = false
+            }, onDismiss = {showDialog = false},
+                shoppingList = shoppingList)
+        }
     }
-
 }
