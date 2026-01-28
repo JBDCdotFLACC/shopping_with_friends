@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -45,6 +46,17 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
             .stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList()
+            )
+
+    val sortedProducts: StateFlow<List<LocalProduct>> =
+        products
+            .map { list ->
+                list.sortedBy { it.isChecked }
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = emptyList()
             )
 

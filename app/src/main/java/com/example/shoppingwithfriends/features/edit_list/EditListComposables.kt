@@ -97,7 +97,7 @@ object EditListComposables {
         )
         val focusProductId by vm.focusProductId.collectAsState()
 
-        val products by vm.products.collectAsStateWithLifecycle(
+        val products by vm.sortedProducts.collectAsStateWithLifecycle(
             minActiveState = Lifecycle.State.CREATED
         )
         DisposableEffect(Unit) {

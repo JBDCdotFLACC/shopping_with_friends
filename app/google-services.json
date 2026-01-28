@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "458009646917",
+    "project_id": "shopping-with-friends-8d6aa",
+    "storage_bucket": "shopping-with-friends-8d6aa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:458009646917:android:a16dfc267f5af2532d502c",
+        "android_client_info": {
+          "package_name": "com.example.shoppingwithfriends"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "458009646917-b2m496isi6cla0jgh8nap0r72ujjb9p6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.shoppingwithfriends",
+            "certificate_hash": "f8bc074197e1d444017600ab6f85fca450e43700"
+          }
+        },
+        {
+          "client_id": "458009646917-3sfrdqbmmbeooap04m3tb9m4lahvjrbt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0_eBQTpBs7SiH0L_QtLxKSvXHreHU2yc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "458009646917-3sfrdqbmmbeooap04m3tb9m4lahvjrbt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
