@@ -66,7 +66,7 @@ object HomeScreenComposables {
                     }
                     is AddListEvent.Error -> {
                         //TODO
-                        // show snackbar
+
                     }
                 }
             }

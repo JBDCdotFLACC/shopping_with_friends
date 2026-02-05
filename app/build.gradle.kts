@@ -46,6 +46,7 @@ android {
 dependencies {
     implementation(libs.material3)
     implementation(libs.navigation3.runtime)
+    implementation(libs.googleid)
     val room_version = "2.8.3"
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
