@@ -1,5 +1,7 @@
 package com.example.shoppingwithfriends.hilt
 
+import com.example.shoppingwithfriends.Auth.AuthRepository
+import com.example.shoppingwithfriends.Auth.AuthRepositoryImpl
 import com.example.shoppingwithfriends.data.ShoppingListRepository
 import com.example.shoppingwithfriends.data.ShoppingListRepositoryImpl
 import dagger.Binds
@@ -14,4 +16,8 @@ abstract class RepositoryBindings {
     @Binds
     @Singleton
     abstract fun bindRepo(impl: ShoppingListRepositoryImpl): ShoppingListRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAuth(impl: AuthRepositoryImpl) : AuthRepository
 }

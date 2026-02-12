@@ -35,18 +35,18 @@ object LoginScreenComposables {
     fun LoginScreen(vm : LoginViewModel = hiltViewModel(),
                     onSuccess: () -> Unit){
         val uiState by vm.uiState.collectAsState()
-        LoginScreenLayout( isLoading = uiState == LoginState.Loading)
+        LoginScreenLayout( isLoading = uiState == LoginState.Loading, onClick = { })
     }
 
 
     @Composable
-    fun LoginScreenLayout(isLoading : Boolean){
+    fun LoginScreenLayout(isLoading : Boolean, onClick: () -> Unit){
         Box {
-            LoginScreenContent()
+            LoginScreenContent(onClick)
             if (isLoading) Box(Modifier
                 .fillMaxSize()
                 .background(scrimColor)
-                .clickable(enabled=false){})
+                .clickable(enabled = false) {})
             {
                 CircularProgressIndicator(Modifier.align(Alignment.Center))
             } }
@@ -54,17 +54,19 @@ object LoginScreenComposables {
 
 
     @Composable
-    fun LoginScreenContent(){
-        Column (Modifier.padding(24.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
+    fun LoginScreenContent(onClick: () -> Unit){
+        Column (Modifier
+            .padding(24.dp)
+            .fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
             Image(
                 painter = painterResource(id = R.drawable.shoppingcart),
-                contentDescription = null, // or null if purely decorative
+                contentDescription = null,
                 modifier = Modifier.fillMaxWidth(.75f),
-                contentScale = ContentScale.Fit,      // Crop/Fill/Fit as needed
+                contentScale = ContentScale.Fit,
             )
             Text(stringResource( R.string.app_name), fontSize = 32.sp, modifier = Modifier.padding(vertical = 15.dp))
             GoogleSignInButton {
-                Firebase.auth
+                onClick
             }
         }
     }

@@ -9,10 +9,17 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import com.example.shoppingwithfriends.Auth.AuthRepository
+import com.example.shoppingwithfriends.Auth.AuthViewModel
 import com.example.shoppingwithfriends.features.edit_list.EditListComposables
 import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables
 import com.example.shoppingwithfriends.features.login.LoginScreenComposables.LoginScreen
@@ -26,27 +33,24 @@ import kotlinx.serialization.Serializable
 @AndroidEntryPoint
 class MainActivity @Inject constructor()
     : ComponentActivity() {
-    @Inject lateinit var auth: FirebaseAuth
+    @Inject lateinit var authRepo: AuthRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             ShoppingWithFriendsTheme {
-                    MyApp()
+                MyApp()
             }
         }
     }
 
     @Composable
-    fun MyApp() {
-        val currentUser = auth.currentUser
-        val backStack =  rememberNavBackStack(Home)
-        if (currentUser == null) {
-            LoginScreen(
-                onSuccess = {backStack.add(Home)}
-            )
-        }
-        else{
+    fun MyApp(authViewModel: AuthViewModel = hiltViewModel()) {
+        val user by authViewModel.currentUser.collectAsStateWithLifecycle()
+        // IMPORTANT: key the backstack by auth state so it resets when login/logout happens
+        val start = if (user == null) Login else Home
+        key(start) {
+            val backStack = rememberNavBackStack(start)
             NavDisplay(
                 backStack = backStack,
                 onBack = { backStack.removeLastOrNull() },
@@ -86,7 +90,7 @@ class MainActivity @Inject constructor()
                 }
             )
         }
-        }
+    }
 
 }
 @Serializable data object Login : NavKey
