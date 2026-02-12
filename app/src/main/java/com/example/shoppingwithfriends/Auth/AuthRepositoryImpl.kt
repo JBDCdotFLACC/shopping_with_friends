@@ -16,12 +16,8 @@ class AuthRepositoryImpl @Inject constructor(private val auth: FirebaseAuth) : A
         val listener = FirebaseAuth.AuthStateListener {
             trySend(it.currentUser)
         }
-
-        // Emit immediately
         trySend(auth.currentUser)
-
         auth.addAuthStateListener(listener)
-
         awaitClose {
             auth.removeAuthStateListener(listener)
         }
