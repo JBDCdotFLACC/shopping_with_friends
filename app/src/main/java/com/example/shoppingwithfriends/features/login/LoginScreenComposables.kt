@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.credentials.CustomCredential
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.shoppingwithfriends.R
 import com.google.android.gms.common.SignInButton
@@ -77,7 +79,9 @@ object LoginScreenComposables {
             GoogleSignInButton {
                 coroutineScope.launch {
                     val idToken = getGoogleIdToken(context)
-                    sendTokenToVm(idToken)
+                    if(idToken != null){
+                        sendTokenToVm(idToken)
+                    }
                 }
             }
         }
@@ -96,34 +100,45 @@ object LoginScreenComposables {
         )
     }
 
-    suspend fun getGoogleIdToken(context: Context): String {
-        val credentialManager = CredentialManager.create(context)
+    suspend fun getGoogleIdToken(context: Context): String? {
 
-        val googleIdOption = GetGoogleIdOption.Builder()
-            .setServerClientId(context.getString(R.string.default_web_client_id))
-            .setFilterByAuthorizedAccounts(false)
-            .build()
+            val credentialManager = CredentialManager.create(context)
 
-        val request = GetCredentialRequest.Builder()
-            .addCredentialOption(googleIdOption)
-            .build()
+            val googleIdOption = GetGoogleIdOption.Builder()
+                .setServerClientId(context.getString(R.string.default_web_client_id))
+                .setFilterByAuthorizedAccounts(false)
+                .setAutoSelectEnabled(false)
+                .build()
 
-        val result = credentialManager.getCredential(
-            context = context,
-            request = request
-        )
+            val request = GetCredentialRequest.Builder()
+                .addCredentialOption(googleIdOption)
+                .build()
+        return try{
+            val result = credentialManager.getCredential(
+                context = context,
+                request = request
+            )
 
-        val credential = result.credential
+            val credential = result.credential
 
-        if (credential is CustomCredential &&
-            credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
-        ) {
-            val googleIdTokenCredential =
-                GoogleIdTokenCredential.createFrom(credential.data)
+            if (credential is CustomCredential &&
+                credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+            ) {
+                val googleIdTokenCredential =
+                    GoogleIdTokenCredential.createFrom(credential.data)
 
-            return googleIdTokenCredential.idToken
-        } else {
-            throw IllegalStateException("Unexpected credential type")
+                googleIdTokenCredential.idToken
+            } else {
+                throw IllegalStateException("Unexpected credential type")
+            }
         }
+        catch (e: GetCredentialCancellationException) {
+            // user hit X / back — not an error
+            null
+        } catch (e: GetCredentialException) {
+
+            throw e
+        }
+
     }
 }

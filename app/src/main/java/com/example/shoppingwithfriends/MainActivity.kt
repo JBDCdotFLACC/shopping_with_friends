@@ -24,7 +24,6 @@ import com.example.shoppingwithfriends.features.edit_list.EditListComposables
 import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables
 import com.example.shoppingwithfriends.features.login.LoginScreenComposables.LoginScreen
 import com.example.shoppingwithfriends.ui.theme.ShoppingWithFriendsTheme
-import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
 import kotlinx.serialization.Serializable
