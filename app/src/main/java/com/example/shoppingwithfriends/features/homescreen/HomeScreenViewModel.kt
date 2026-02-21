@@ -13,14 +13,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Date
-import java.util.UUID
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(private val repo: ShoppingListRepository): ViewModel() {
@@ -29,24 +25,16 @@ class HomeScreenViewModel @Inject constructor(private val repo: ShoppingListRepo
         val error: String? = null
     )
 
-    private val _userId = MutableStateFlow<String?>(null)
-
     private val _events = MutableSharedFlow<AddListEvent>()
     val events = _events.asSharedFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val shoppingLists: StateFlow<List<LocalShoppingList>> =
-        _userId
-            .filterNotNull()
-            .distinctUntilChanged()
-            .flatMapLatest { id : String ->
-                repo.getListsForUser(id)
-            }
-            .stateIn(
-                viewModelScope,
-                SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList()
-            )
+        repo.getAllListsForUser().stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     private val _state = MutableStateFlow(UiState(isLoading = true))
     val state: StateFlow<UiState> = _state
@@ -58,11 +46,7 @@ class HomeScreenViewModel @Inject constructor(private val repo: ShoppingListRepo
 
     fun submit(listName : String) {
         viewModelScope.launch {
-                val newId = UUID.randomUUID().toString()
-                repo.addNewShoppingList(LocalShoppingList(
-                    newId, listName,
-                    Date().time,
-                    "1"))
+                val newId = repo.addNewShoppingList(Date().time, listName)
                 _events.emit(AddListEvent.Success(newId))
         }
     }
@@ -75,8 +59,7 @@ class HomeScreenViewModel @Inject constructor(private val repo: ShoppingListRepo
 
     fun refresh() = viewModelScope.launch {
         _state.update { it.copy(isLoading = true, error = null) }
-        _userId.value = "1"
-        runCatching { repo.getListsForUser("1") }
+        runCatching { repo.getAllListsForUser() }
             .onSuccess { list -> _state.update { val newState = it.copy(isLoading = false)
                 newState }
             }

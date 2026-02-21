@@ -1,21 +1,49 @@
 package com.example.shoppingwithfriends.data
 
-import android.util.Log
+import com.example.shoppingwithfriends.Auth.AuthRepository
 import com.example.shoppingwithfriends.data.source.local.LocalProduct
 import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
 import com.example.shoppingwithfriends.data.source.local.ShoppingDao
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import java.util.UUID
 import javax.inject.Inject
 
-class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource: ShoppingDao) : ShoppingListRepository {
-    override fun getListsForUser(userId: String): Flow<List<LocalShoppingList>> {
-        return localDataSource.getAllShoppingLists()
+class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource: ShoppingDao,
+                                                     private val authRepository: AuthRepository) : ShoppingListRepository {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun getAllListsForUser(): Flow<List<LocalShoppingList>> {
+        return authRepository.currentUser
+            .flatMapLatest { user ->
+                if (user == null) {
+                    flowOf(emptyList())
+                } else {
+                    localDataSource.getAllShoppingListsForUser(user.uid)
+                }
+            }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun addNewShoppingList(
-        shoppingList: LocalShoppingList
-    ) {
-        localDataSource.insertShoppingList(shoppingList)
+        date: Long,
+        listName: String
+    ) : String {
+        val user = authRepository.currentUser.first()
+            ?: throw IllegalStateException("User not signed in")
+
+        val newId = UUID.randomUUID().toString()
+        val newShoppingList = LocalShoppingList(
+            id = newId,
+            name = listName,
+            date = date,
+            owner = user.uid
+        )
+
+        localDataSource.insertShoppingList(newShoppingList)
+        return newId
     }
 
     override suspend fun addFriendToShoppingList(shoppingListId: String, friendId: String) {

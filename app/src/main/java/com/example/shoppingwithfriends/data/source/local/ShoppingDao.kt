@@ -32,6 +32,9 @@ interface ShoppingDao {
     @Query(value = "SELECT * FROM shopping_list")
     fun getAllShoppingLists(): Flow<List<LocalShoppingList>>
 
+    @Query(value = "SELECT * FROM shopping_list WHERE owner = :userId")
+    fun getAllShoppingListsForUser(vararg userId : String): Flow<List<LocalShoppingList>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertShoppingList(vararg shoppingList: LocalShoppingList)
 
