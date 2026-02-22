@@ -44,4 +44,21 @@ interface ShoppingDao {
     @Query(value = "SELECT * FROM shopping_list WHERE id = :shoppingListId")
     suspend fun getShoppingList(shoppingListId : String) : LocalShoppingList
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPendingOp(vararg pendingOp: PendingOp)
+
+    @Query("UPDATE pending_ops SET state = :syncState WHERE id = :opId")
+    suspend fun updatePendingOp(opId: String, syncState: SyncState)
+
+    @Query("SELECT * FROM pending_ops WHERE state = :state")
+    suspend fun getOpsByState(state: SyncState): List<PendingOp>
+
+    @Query("""
+  SELECT * FROM pending_ops
+  WHERE state = 'PENDING'
+  ORDER BY createdAt ASC
+  LIMIT 1
+""")
+    suspend fun getOldestPending(): PendingOp?
+
 }

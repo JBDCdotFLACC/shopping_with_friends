@@ -1,4 +1,4 @@
-package com.example.shoppingwithfriends.Auth
+package com.example.shoppingwithfriends.auth
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser

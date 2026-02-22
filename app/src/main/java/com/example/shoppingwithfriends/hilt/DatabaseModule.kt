@@ -19,10 +19,11 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): ShoppingDatabase {
         return Room.databaseBuilder(
-            context,
-            ShoppingDatabase::class.java,
-            "shopping.db"
-        ).build()
+                context,
+                ShoppingDatabase::class.java,
+                "shopping.db"
+            ).fallbackToDestructiveMigration(true)
+            .build()
     }
 
     @Provides

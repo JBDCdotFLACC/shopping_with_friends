@@ -1,6 +1,5 @@
-package com.example.shoppingwithfriends.Auth
+package com.example.shoppingwithfriends.auth
 
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser

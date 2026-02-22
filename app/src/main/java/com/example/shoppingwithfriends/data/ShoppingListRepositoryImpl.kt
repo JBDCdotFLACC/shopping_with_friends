@@ -1,19 +1,28 @@
 package com.example.shoppingwithfriends.data
 
-import com.example.shoppingwithfriends.Auth.AuthRepository
+import android.util.Log
+import com.example.shoppingwithfriends.auth.AuthRepository
 import com.example.shoppingwithfriends.data.source.local.LocalProduct
 import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
+import com.example.shoppingwithfriends.data.source.local.OpType
+import com.example.shoppingwithfriends.data.source.local.PendingOp
 import com.example.shoppingwithfriends.data.source.local.ShoppingDao
+import com.example.shoppingwithfriends.data.source.local.SyncState
+import com.example.shoppingwithfriends.data.sync.SyncWorkManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.serialization.json.Json
+import java.util.Date
 import java.util.UUID
 import javax.inject.Inject
 
 class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource: ShoppingDao,
-                                                     private val authRepository: AuthRepository) : ShoppingListRepository {
+                                                     private val authRepository: AuthRepository,
+                                                     private val syncWorkManager: SyncWorkManager
+) : ShoppingListRepository {
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getAllListsForUser(): Flow<List<LocalShoppingList>> {
         return authRepository.currentUser
@@ -34,16 +43,30 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
         val user = authRepository.currentUser.first()
             ?: throw IllegalStateException("User not signed in")
 
-        val newId = UUID.randomUUID().toString()
+        val shoppingListId = UUID.randomUUID().toString()
         val newShoppingList = LocalShoppingList(
-            id = newId,
+            id = shoppingListId,
             name = listName,
             date = date,
             owner = user.uid
         )
 
         localDataSource.insertShoppingList(newShoppingList)
-        return newId
+        val json = Json.encodeToString(newShoppingList)
+        val opId = UUID.randomUUID().toString()
+        val pendingOp = PendingOp(id = opId,
+            type = OpType.CREATE_LIST,
+            entityId = shoppingListId,
+            parentId = null,
+            payloadJson = json,
+            createdAt = Date().time,
+            retryCount = 0,
+            state = SyncState.PENDING
+        )
+        localDataSource.insertPendingOp(pendingOp)
+        syncWorkManager.scheduleSync()
+        Log.i("wxyz", "in shoppinglist repo")
+        return shoppingListId
     }
 
     override suspend fun addFriendToShoppingList(shoppingListId: String, friendId: String) {

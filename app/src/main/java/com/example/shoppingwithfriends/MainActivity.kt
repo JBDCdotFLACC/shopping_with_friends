@@ -11,15 +11,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.remember
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import com.example.shoppingwithfriends.Auth.AuthRepository
-import com.example.shoppingwithfriends.Auth.AuthViewModel
+import com.example.shoppingwithfriends.auth.AuthRepository
+import com.example.shoppingwithfriends.auth.AuthViewModel
 import com.example.shoppingwithfriends.features.edit_list.EditListComposables
 import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables
 import com.example.shoppingwithfriends.features.login.LoginScreenComposables.LoginScreen
