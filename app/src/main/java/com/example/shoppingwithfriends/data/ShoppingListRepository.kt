@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.Flow
 interface ShoppingListRepository {
     fun getAllListsForUser() : Flow<List<LocalShoppingList>>
     suspend fun addNewShoppingList(date : Long, listName : String) : String
-    suspend fun addFriendToShoppingList(shoppingListId : String, friendId : String)
     suspend fun getShoppingList(shoppingListId : String) : LocalShoppingList
     suspend fun setProductCheck(productId: String, isChecked: Boolean)
     fun getProductList(shoppingListId : String) : Flow<List<LocalProduct>>

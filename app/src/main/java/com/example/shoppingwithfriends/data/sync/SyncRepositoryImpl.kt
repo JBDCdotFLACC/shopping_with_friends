@@ -11,6 +11,10 @@ class SyncRepositoryImpl @Inject constructor(private val localDataSource: Shoppi
         return localDataSource.getOldestPending()
     }
 
+    override suspend fun getPendingOps(): List<PendingOp> {
+        return localDataSource.getOpsByState(SyncState.PENDING)
+    }
+
     override suspend fun markDone(id: String) {
         localDataSource.updatePendingOp(id, SyncState.SYNCED)
     }

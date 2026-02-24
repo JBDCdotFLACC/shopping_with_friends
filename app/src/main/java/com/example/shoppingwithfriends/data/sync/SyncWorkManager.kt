@@ -13,7 +13,6 @@ class SyncWorkManager @Inject constructor(
     private val workManager: WorkManager
 ) {
     fun scheduleSync() {
-        Log.i("wxyz", "in scheduled sync")
         val request = OneTimeWorkRequestBuilder<SyncWorker>()
             .setConstraints(
                 Constraints.Builder()

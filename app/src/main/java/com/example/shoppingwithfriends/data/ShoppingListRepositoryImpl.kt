@@ -53,6 +53,7 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
 
         localDataSource.insertShoppingList(newShoppingList)
         val json = Json.encodeToString(newShoppingList)
+        val objy = Json.decodeFromString<LocalShoppingList>(json)
         val opId = UUID.randomUUID().toString()
         val pendingOp = PendingOp(id = opId,
             type = OpType.CREATE_LIST,
@@ -65,12 +66,7 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
         )
         localDataSource.insertPendingOp(pendingOp)
         syncWorkManager.scheduleSync()
-        Log.i("wxyz", "in shoppinglist repo")
         return shoppingListId
-    }
-
-    override suspend fun addFriendToShoppingList(shoppingListId: String, friendId: String) {
-        TODO("Not yet implemented")
     }
 
     override suspend fun getShoppingList(shoppingListId: String): LocalShoppingList {

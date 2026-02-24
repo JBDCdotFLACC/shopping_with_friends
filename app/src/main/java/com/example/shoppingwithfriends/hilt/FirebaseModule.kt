@@ -5,6 +5,8 @@ import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
 import dagger.Provides
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
@@ -14,4 +16,7 @@ object FirebaseModule {
 
     @Provides
     fun provideFirebaseAuth(): FirebaseAuth = Firebase.auth
+
+    @Provides
+    fun provideFireStore() : FirebaseFirestore = Firebase.firestore
 }
