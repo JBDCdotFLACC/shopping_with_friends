@@ -53,7 +53,6 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
 
         localDataSource.insertShoppingList(newShoppingList)
         val json = Json.encodeToString(newShoppingList)
-        val objy = Json.decodeFromString<LocalShoppingList>(json)
         val opId = UUID.randomUUID().toString()
         val pendingOp = PendingOp(id = opId,
             type = OpType.CREATE_LIST,
@@ -85,6 +84,29 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
     }
 
     override suspend fun updateListName(shoppingListId: String, newName: String) {
+        val user = authRepository.currentUser.first()
+            ?: throw IllegalStateException("User not signed in")
+
+        val newShoppingList = LocalShoppingList(
+            id = shoppingListId,
+            name = newName,
+            date = 0L,
+            owner = user.uid
+        )
+
+        val json = Json.encodeToString(newShoppingList)
+        val opId = UUID.randomUUID().toString()
+        val pendingOp = PendingOp(id = opId,
+            type = OpType.UPDATE_LIST_NAME,
+            entityId = shoppingListId,
+            parentId = null,
+            payloadJson = json,
+            createdAt = Date().time,
+            retryCount = 0,
+            state = SyncState.PENDING
+        )
+        localDataSource.insertPendingOp(pendingOp)
+        syncWorkManager.scheduleSync()
         localDataSource.updateListName(shoppingListId, newName)
     }
 
