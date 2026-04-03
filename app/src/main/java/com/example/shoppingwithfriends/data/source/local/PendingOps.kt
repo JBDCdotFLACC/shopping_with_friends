@@ -11,7 +11,6 @@ data class PendingOp(
     @PrimaryKey val id: String,
     val type: OpType,
     val entityId: String,
-    val parentId: String?, // e.g., listId for items
     val payloadJson: String?,
     val createdAt: Long,
     val retryCount: Int,
@@ -19,12 +18,12 @@ data class PendingOp(
 )
 
 enum class OpType {
-    CREATE_ITEM,
-    UPDATE_ITEM_CHECKED,
-    UPDATE_ITEM_NAME,
-    DELETE_ITEM,
+    CREATE_PRODUCT,
+    UPDATE_PRODUCT_CHECKED,
+    UPDATE_PRODUCT_NAME,
+    DELETE_PRODUCT,
     CREATE_LIST,
-    ADD_MEMBER,
+    DELETE_LIST,
     UPDATE_LIST_NAME
 }
 

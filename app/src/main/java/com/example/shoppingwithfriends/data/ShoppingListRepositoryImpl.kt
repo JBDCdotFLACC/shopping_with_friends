@@ -1,6 +1,6 @@
 package com.example.shoppingwithfriends.data
 
-import android.util.Log
+import androidx.paging.DiffingChangePayload
 import com.example.shoppingwithfriends.auth.AuthRepository
 import com.example.shoppingwithfriends.data.source.local.LocalProduct
 import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
@@ -8,6 +8,7 @@ import com.example.shoppingwithfriends.data.source.local.OpType
 import com.example.shoppingwithfriends.data.source.local.PendingOp
 import com.example.shoppingwithfriends.data.source.local.ShoppingDao
 import com.example.shoppingwithfriends.data.source.local.SyncState
+import com.example.shoppingwithfriends.data.source.local.SyncUpdate
 import com.example.shoppingwithfriends.data.sync.SyncWorkManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -42,7 +43,6 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
     ) : String {
         val user = authRepository.currentUser.first()
             ?: throw IllegalStateException("User not signed in")
-
         val shoppingListId = UUID.randomUUID().toString()
         val newShoppingList = LocalShoppingList(
             id = shoppingListId,
@@ -50,19 +50,11 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
             date = date,
             owner = user.uid
         )
-
         localDataSource.insertShoppingList(newShoppingList)
         val json = Json.encodeToString(newShoppingList)
-        val opId = UUID.randomUUID().toString()
-        val pendingOp = PendingOp(id = opId,
-            type = OpType.CREATE_LIST,
+        val pendingOp = createPendingOp(opType = OpType.CREATE_LIST,
             entityId = shoppingListId,
-            parentId = null,
-            payloadJson = json,
-            createdAt = Date().time,
-            retryCount = 0,
-            state = SyncState.PENDING
-        )
+            payload = json)
         localDataSource.insertPendingOp(pendingOp)
         syncWorkManager.scheduleSync()
         return shoppingListId
@@ -76,7 +68,13 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
         productId: String,
         isChecked: Boolean
     ) {
+        val syncUpdate = SyncUpdate(id = productId, isChecked = isChecked)
+        val json = Json.encodeToString(syncUpdate)
+        val pendingOp = createPendingOp(opType = OpType.UPDATE_PRODUCT_CHECKED,
+            entityId = productId,
+            payload = json)
         localDataSource.updateCompleted(productId, isChecked)
+        localDataSource.insertPendingOp(pendingOp)
     }
 
     override suspend fun deleteProduct(productId: String) {
@@ -86,32 +84,25 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
     override suspend fun updateListName(shoppingListId: String, newName: String) {
         val user = authRepository.currentUser.first()
             ?: throw IllegalStateException("User not signed in")
-
-        val newShoppingList = LocalShoppingList(
-            id = shoppingListId,
-            name = newName,
-            date = 0L,
-            owner = user.uid
-        )
-
-        val json = Json.encodeToString(newShoppingList)
-        val opId = UUID.randomUUID().toString()
-        val pendingOp = PendingOp(id = opId,
-            type = OpType.UPDATE_LIST_NAME,
+        val syncUpdate = SyncUpdate(id = shoppingListId, content = newName)
+        val json = Json.encodeToString(syncUpdate)
+        val pendingOp = createPendingOp(opType = OpType.UPDATE_LIST_NAME,
             entityId = shoppingListId,
-            parentId = null,
-            payloadJson = json,
-            createdAt = Date().time,
-            retryCount = 0,
-            state = SyncState.PENDING
-        )
+            payload = json)
+        localDataSource.updateListName(shoppingListId, newName)
         localDataSource.insertPendingOp(pendingOp)
         syncWorkManager.scheduleSync()
-        localDataSource.updateListName(shoppingListId, newName)
     }
 
     override suspend fun updateProductName(productId: String, newName: String) {
+        val syncUpdate = SyncUpdate(id = productId, content = newName)
+        val json = Json.encodeToString(syncUpdate)
+        val pendingOp = createPendingOp(opType = OpType.UPDATE_PRODUCT_NAME,
+            entityId = productId,
+            payload = json)
         localDataSource.updateProductName(productId, newName)
+        localDataSource.insertPendingOp(pendingOp)
+        syncWorkManager.scheduleSync()
     }
 
     override fun getProductList(shoppingListId: String): Flow<List<LocalProduct>> {
@@ -119,11 +110,31 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
     }
 
     override suspend fun addProduct(product: LocalProduct) {
-        localDataSource.insertProduct(product)
+        val productId = UUID.randomUUID().toString()
+        val newProduct = product.copy(id = productId)
+        localDataSource.insertProduct(newProduct)
+        val json = Json.encodeToString(newProduct)
+        val pendingOp = createPendingOp(opType = OpType.CREATE_PRODUCT,
+            entityId = productId,
+            payload = json)
+        localDataSource.insertPendingOp(pendingOp)
+        syncWorkManager.scheduleSync()
     }
 
     override suspend fun deleteList(listId: String) {
         localDataSource.deleteShoppingList(listId)
         localDataSource.deleteProductsFromShoppingList(listId)
+    }
+
+    fun createPendingOp(opType : OpType, entityId : String, payload: String?) : PendingOp{
+        val opId = UUID.randomUUID().toString()
+        return PendingOp(id = opId,
+            type = opType,
+            entityId = entityId,
+            payloadJson = payload,
+            createdAt = Date().time,
+            retryCount = 0,
+            state = SyncState.PENDING
+        )
     }
 }

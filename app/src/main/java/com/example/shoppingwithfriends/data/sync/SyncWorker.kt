@@ -4,18 +4,18 @@ import android.content.Context
 import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
-import androidx.work.Worker
 import androidx.work.WorkerParameters
+import com.example.shoppingwithfriends.data.source.local.LocalProduct
 import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
 import com.example.shoppingwithfriends.data.source.local.OpType
 import com.example.shoppingwithfriends.data.source.local.SyncState
-import com.google.firebase.auth.FirebaseAuth
+import com.example.shoppingwithfriends.data.source.local.SyncUpdate
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Source
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.json.Json
-import javax.inject.Inject
 
 @HiltWorker
 class SyncWorker @AssistedInject constructor(@Assisted appContext: Context, @Assisted workerParams: WorkerParameters,
@@ -26,20 +26,33 @@ class SyncWorker @AssistedInject constructor(@Assisted appContext: Context, @Ass
     override suspend fun doWork(): Result {
 
         val pendingOpsList = syncRepository.getPendingOps().filter { it.state != SyncState.SYNCED }
-        Log.i("wxyz", pendingOpsList.toString())
         for(op in pendingOpsList){
             if(op.payloadJson == null) continue
-            val payload = Json.decodeFromString<LocalShoppingList>(op.payloadJson)
             when(op.type){
                 OpType.CREATE_LIST -> {
-                    Log.i("wxyz", "create list")
                     try{
+                        val payload = Json.decodeFromString<LocalShoppingList>(op.payloadJson)
                         fireBaseFireStore.collection("lists")
                             .document(payload.id)
                             .set(payload)
                             .await()
                         syncRepository.markDone(op.id)
-                        Log.i("wxyz", "insert")
+                    }
+                    catch (e : Exception){
+                        Log.i("wxyz", e.message.toString())
+                        syncRepository.markFailure(op.id)
+                    }
+                }
+                OpType.CREATE_PRODUCT -> {
+                    try{
+                        val payload = Json.decodeFromString<LocalProduct>(op.payloadJson)
+                        fireBaseFireStore.collection("products")
+                            .document(payload.id)
+                            .set(payload)
+                            .await()
+                        syncRepository.markDone(op.id)
+                        val task = fireBaseFireStore.collection("products").document(payload.id).set(payload)
+                        task.await()
                     }
                     catch (e : Exception){
                         Log.i("wxyz", e.message.toString())
@@ -47,23 +60,54 @@ class SyncWorker @AssistedInject constructor(@Assisted appContext: Context, @Ass
                     }
                 }
                 OpType.UPDATE_LIST_NAME -> {
-                    Log.i("wxyz", "update list name")
                     try{
+                        val payload = Json.decodeFromString<SyncUpdate>(op.payloadJson)
+                        val safeName = payload.content ?: throw IllegalArgumentException("Name cannot be null")
                         fireBaseFireStore.collection("lists")
                             .document(payload.id)
-                            .update("name", payload.name)
+                            .update("name", safeName)
                             .await()
                         syncRepository.markDone(op.id)
-                        Log.i("wxyz", "update")
+                    }
+                    catch (e: Exception){
+                        syncRepository.markFailure(op.id)
+                    }
+                }
+                OpType.UPDATE_PRODUCT_NAME ->{
+                    try {
+                        val payload = Json.decodeFromString<SyncUpdate>(op.payloadJson)
+                        val safeName = payload.content ?: throw IllegalArgumentException("Name cannot be null")
+                        fireBaseFireStore.collection("products")
+                            .document(payload.id)
+                            .update("content", safeName)
+                            .await()
                     }
                     catch (e: Exception){
                         Log.i("wxyz", e.message.toString())
                         syncRepository.markFailure(op.id)
                     }
                 }
-                else -> {
-                    Log.i("wxyz", op.type.toString())
+                OpType.DELETE_PRODUCT -> {
+
                 }
+                OpType.UPDATE_PRODUCT_CHECKED -> {
+                    try{
+                        val payload = Json.decodeFromString<SyncUpdate>(op.payloadJson)
+                        val safeChecked = payload.isChecked ?: throw IllegalArgumentException("Checked cannot be null")
+                        fireBaseFireStore.collection("products")
+                            .document(payload.id)
+                            .update("isChecked", safeChecked)
+                            .await()
+                    }
+                    catch (e : Exception){
+                        Log.i("wxyz", e.message.toString())
+                        syncRepository.markFailure(op.id)
+                    }
+                }
+                OpType.DELETE_LIST -> {
+
+                }
+
             }
 
         }
