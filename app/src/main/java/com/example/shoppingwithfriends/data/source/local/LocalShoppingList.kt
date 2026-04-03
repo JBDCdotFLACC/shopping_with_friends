@@ -2,6 +2,8 @@ package com.example.shoppingwithfriends.data.source.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.google.firebase.firestore.PropertyName
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Entity(
@@ -15,4 +17,8 @@ data class LocalShoppingList (
     var name: String,
     var date: Long,
     var owner: String,
+    @get:PropertyName("isDeleted")
+    @set:PropertyName("isDeleted")
+    @SerialName("isDeleted")
+    var isDeleted: Boolean = false
 )

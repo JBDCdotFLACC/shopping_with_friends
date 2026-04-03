@@ -20,4 +20,8 @@ data class LocalProduct (
     @set:PropertyName("isChecked")
     @SerialName("isChecked")
     var isChecked: Boolean,
+    @get:PropertyName("isDeleted")
+    @set:PropertyName("isDeleted")
+    @SerialName("isDeleted")
+    var isDeleted: Boolean = false,
 )

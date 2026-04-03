@@ -48,7 +48,8 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
             id = shoppingListId,
             name = listName,
             date = date,
-            owner = user.uid
+            owner = user.uid,
+            isDeleted = false
         )
         localDataSource.insertShoppingList(newShoppingList)
         val json = Json.encodeToString(newShoppingList)
@@ -78,7 +79,12 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
     }
 
     override suspend fun deleteProduct(productId: String) {
+        val syncUpdate = SyncUpdate(id = productId)
+        val json = Json.encodeToString(syncUpdate)
+        val pendingOp = createPendingOp(opType = OpType.DELETE_PRODUCT, entityId = productId, payload = json)
         localDataSource.deleteById(productId)
+        localDataSource.insertPendingOp(pendingOp)
+        syncWorkManager.scheduleSync()
     }
 
     override suspend fun updateListName(shoppingListId: String, newName: String) {
@@ -122,8 +128,14 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
     }
 
     override suspend fun deleteList(listId: String) {
+        val syncUpdate = SyncUpdate(id = listId)
+        val json = Json.encodeToString(syncUpdate)
+        val pendingOp = createPendingOp(opType = OpType.DELETE_LIST, entityId = listId, payload = json)
         localDataSource.deleteShoppingList(listId)
         localDataSource.deleteProductsFromShoppingList(listId)
+        localDataSource.insertPendingOp(pendingOp)
+        syncWorkManager.scheduleSync()
+
     }
 
     fun createPendingOp(opType : OpType, entityId : String, payload: String?) : PendingOp{

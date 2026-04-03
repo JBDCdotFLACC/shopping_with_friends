@@ -88,6 +88,18 @@ class SyncWorker @AssistedInject constructor(@Assisted appContext: Context, @Ass
                     }
                 }
                 OpType.DELETE_PRODUCT -> {
+                    try{
+                        val payload = Json.decodeFromString<SyncUpdate>(op.payloadJson)
+                        fireBaseFireStore.collection("products")
+                            .document(payload.id)
+                            .update("isDeleted", true)
+                            .await()
+                    }
+                    catch (e : Exception){
+                        Log.i("wxyz", e.message.toString())
+                        syncRepository.markFailure(op.id)
+                    }
+
 
                 }
                 OpType.UPDATE_PRODUCT_CHECKED -> {
@@ -105,7 +117,17 @@ class SyncWorker @AssistedInject constructor(@Assisted appContext: Context, @Ass
                     }
                 }
                 OpType.DELETE_LIST -> {
-
+                    try{
+                        val payload = Json.decodeFromString<SyncUpdate>(op.payloadJson)
+                        fireBaseFireStore.collection("lists")
+                            .document(payload.id)
+                            .update("isDeleted", true)
+                            .await()
+                    }
+                    catch (e : Exception){
+                        Log.i("wxyz", e.message.toString())
+                        syncRepository.markFailure(op.id)
+                    }
                 }
 
             }

@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ShoppingDao {
-    @Query("SELECT * FROM product WHERE parent = :listId")
+    @Query("SELECT * FROM product WHERE parent = :listId AND isDeleted = 0")
     fun getProductList(listId: String): Flow<List<LocalProduct>>
 
     @Query("UPDATE product SET isChecked = :checked WHERE id = :productId")
@@ -20,19 +20,17 @@ interface ShoppingDao {
     @Query("UPDATE product SET content = :newName WHERE id = :productId")
     suspend fun updateProductName(productId: String, newName: String)
 
-    @Query("DELETE FROM product WHERE id = :productId")
+    @Query("UPDATE product SET isDeleted = 1 WHERE id = :productId")
     suspend fun deleteById(productId: String): Int
 
-    @Query("DELETE FROM shopping_list WHERE id = :shoppingListId")
+    @Query("UPDATE shopping_list SET isDeleted = 1 WHERE id = :shoppingListId")
     suspend fun deleteShoppingList(shoppingListId: String)
 
-    @Query("DELETE FROM product WHERE parent = :shoppingListId")
+    @Query("UPDATE product SET isDeleted = 1 WHERE parent = :shoppingListId ")
     suspend fun deleteProductsFromShoppingList(shoppingListId: String)
 
-    @Query(value = "SELECT * FROM shopping_list")
-    fun getAllShoppingLists(): Flow<List<LocalShoppingList>>
 
-    @Query(value = "SELECT * FROM shopping_list WHERE owner = :userId")
+    @Query(value = "SELECT * FROM shopping_list WHERE owner = :userId AND isDeleted = 0")
     fun getAllShoppingListsForUser(vararg userId : String): Flow<List<LocalShoppingList>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
