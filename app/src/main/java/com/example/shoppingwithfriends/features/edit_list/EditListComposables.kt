@@ -169,6 +169,7 @@ object EditListComposables {
                        products : List<LocalProduct>,
                        focusProductId: String?){
         Column(modifier = modifier.wrapContentHeight().imePadding()) {
+            Log.i("wxyz", focusProductId.toString())
             val listState = rememberLazyListState()
             var previousSize by remember { mutableStateOf(products.size) }
 
@@ -196,6 +197,8 @@ object EditListComposables {
 
     @Composable
     fun ProductRow(product : LocalProduct, actions : EditListActions, shouldRequestFocus : Boolean, modifier : Modifier){
+        Log.i("wxyz", product.id)
+        if(shouldRequestFocus) Log.i("wxyz", "should request focus!")
         var text by rememberSaveable(product.id) { mutableStateOf(product.content) }
         var isEditing by rememberSaveable(product.id) { mutableStateOf(false) } // I don't want my text to get overwritten if the databse emits while we are editing
         val focusRequester = remember { FocusRequester() }

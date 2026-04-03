@@ -1,5 +1,6 @@
 package com.example.shoppingwithfriends.features.edit_list
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.shoppingwithfriends.data.ShoppingListRepository
@@ -92,6 +93,7 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
 
     fun clearFocusRequest() {
         _focusProductId.value = null
+        Log.i("wxyz", "clear focus")
     }
 
     fun addItem(){
@@ -103,6 +105,7 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
                 parent =_listId.value ?: return@launch,
                 isChecked = false))
             _focusProductId.value = newId
+            Log.i("wxyz", "newID")
         }
     }
 

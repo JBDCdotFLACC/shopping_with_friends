@@ -116,12 +116,10 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
     }
 
     override suspend fun addProduct(product: LocalProduct) {
-        val productId = UUID.randomUUID().toString()
-        val newProduct = product.copy(id = productId)
-        localDataSource.insertProduct(newProduct)
-        val json = Json.encodeToString(newProduct)
+        localDataSource.insertProduct(product)
+        val json = Json.encodeToString(product)
         val pendingOp = createPendingOp(opType = OpType.CREATE_PRODUCT,
-            entityId = productId,
+            entityId = product.id,
             payload = json)
         localDataSource.insertPendingOp(pendingOp)
         syncWorkManager.scheduleSync()
