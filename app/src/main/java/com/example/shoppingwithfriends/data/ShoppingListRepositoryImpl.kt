@@ -74,23 +74,23 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
         productId: String,
         isChecked: Boolean
     ) {
-        val syncUpdate = SyncUpdate(id = productId, isChecked = isChecked)
+        val versionId = UUID.randomUUID().toString()
+        val syncUpdate = SyncUpdate(id = productId, isChecked = isChecked, versionId = versionId)
         val json = Json.encodeToString(syncUpdate)
         val pendingOp = createPendingOp(opType = OpType.UPDATE_PRODUCT_CHECKED,
             entityId = productId,
             payload = json)
         localDataSource.updateCompleted(productId, isChecked)
-        val versionId = UUID.randomUUID().toString()
         localDataSource.updateProductVersionId(productId, versionId)
         localDataSource.insertPendingOp(pendingOp)
     }
 
     override suspend fun deleteProduct(productId: String) {
-        val syncUpdate = SyncUpdate(id = productId)
+        val versionId = UUID.randomUUID().toString()
+        val syncUpdate = SyncUpdate(id = productId, versionId = versionId)
         val json = Json.encodeToString(syncUpdate)
         val pendingOp = createPendingOp(opType = OpType.DELETE_PRODUCT, entityId = productId, payload = json)
         localDataSource.deleteById(productId)
-        val versionId = UUID.randomUUID().toString()
         localDataSource.updateProductVersionId(productId, versionId)
         localDataSource.insertPendingOp(pendingOp)
         syncWorkManager.scheduleSync()
@@ -99,26 +99,26 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
     override suspend fun updateListName(shoppingListId: String, newName: String) {
         val user = authRepository.currentUser.first()
             ?: throw IllegalStateException("User not signed in")
-        val syncUpdate = SyncUpdate(id = shoppingListId, content = newName)
+        val versionId = UUID.randomUUID().toString()
+        val syncUpdate = SyncUpdate(id = shoppingListId, content = newName, versionId = versionId)
         val json = Json.encodeToString(syncUpdate)
         val pendingOp = createPendingOp(opType = OpType.UPDATE_LIST_NAME,
             entityId = shoppingListId,
             payload = json)
         localDataSource.updateListName(shoppingListId, newName)
-        val versionId = UUID.randomUUID().toString()
         localDataSource.updateShoppingListVersionId(shoppingListId, versionId)
         localDataSource.insertPendingOp(pendingOp)
         syncWorkManager.scheduleSync()
     }
 
     override suspend fun updateProductName(productId: String, newName: String) {
-        val syncUpdate = SyncUpdate(id = productId, content = newName)
+        val versionId = UUID.randomUUID().toString()
+        val syncUpdate = SyncUpdate(id = productId, content = newName, versionId = versionId)
         val json = Json.encodeToString(syncUpdate)
         val pendingOp = createPendingOp(opType = OpType.UPDATE_PRODUCT_NAME,
             entityId = productId,
             payload = json)
         localDataSource.updateProductName(productId, newName)
-        val versionId = UUID.randomUUID().toString()
         localDataSource.updateProductVersionId(productId, versionId)
         localDataSource.insertPendingOp(pendingOp)
         syncWorkManager.scheduleSync()
@@ -139,12 +139,12 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
     }
 
     override suspend fun deleteList(listId: String) {
-        val syncUpdate = SyncUpdate(id = listId)
+        val versionId = UUID.randomUUID().toString()
+        val syncUpdate = SyncUpdate(id = listId, versionId = versionId)
         val json = Json.encodeToString(syncUpdate)
         val pendingOp = createPendingOp(opType = OpType.DELETE_LIST, entityId = listId, payload = json)
         localDataSource.deleteShoppingList(listId)
         localDataSource.deleteProductsFromShoppingList(listId)
-        val versionId = UUID.randomUUID().toString()
         localDataSource.updateShoppingListVersionId(listId, versionId)
         localDataSource.insertPendingOp(pendingOp)
         syncWorkManager.scheduleSync()

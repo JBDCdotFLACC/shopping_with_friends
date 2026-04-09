@@ -58,7 +58,8 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
         val isLoading: Boolean = false,
         val listId: String = "",
         val error: String? = null,
-        val listName: String = ""
+        val listName: String = "",
+        val isNameChanged: Boolean = false
     )
 
 
@@ -67,7 +68,8 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
     val state: StateFlow<UiState> = _state
 
     fun onListNameChanged(newValue: String) {
-        _state.update { it.copy(listName = newValue) }
+        Log.i("wxyz", "name changed")
+        _state.update { it.copy(listName = newValue, isNameChanged = true) }
     }
 
     fun onCheckChanged(productId : String, isChecked : Boolean){
@@ -110,8 +112,10 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
     }
 
     fun onPause() {
-        viewModelScope.launch {
-            repo.updateListName(state.value.listId, state.value.listName)
+        if(state.value.isNameChanged){
+            viewModelScope.launch {
+                repo.updateListName(state.value.listId, state.value.listName)
+            }
         }
     }
 

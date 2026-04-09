@@ -26,6 +26,7 @@ class SyncWorker @AssistedInject constructor(@Assisted appContext: Context, @Ass
     override suspend fun doWork(): Result {
 
         val pendingOpsList = syncRepository.getPendingOps().filter { it.state != SyncState.SYNCED }
+        Log.i("wxyz", pendingOpsList.toString())
         for(op in pendingOpsList){
             if(op.payloadJson == null) continue
             when(op.type){
@@ -63,9 +64,10 @@ class SyncWorker @AssistedInject constructor(@Assisted appContext: Context, @Ass
                     try{
                         val payload = Json.decodeFromString<SyncUpdate>(op.payloadJson)
                         val safeName = payload.content ?: throw IllegalArgumentException("Name cannot be null")
+                        val versionId = payload.versionId ?: throw IllegalArgumentException("VersionId cannot be null")
                         fireBaseFireStore.collection("lists")
                             .document(payload.id)
-                            .update("name", safeName)
+                            .update("name", safeName, "versionId", versionId)
                             .await()
                         syncRepository.markDone(op.id)
                     }
@@ -77,10 +79,12 @@ class SyncWorker @AssistedInject constructor(@Assisted appContext: Context, @Ass
                     try {
                         val payload = Json.decodeFromString<SyncUpdate>(op.payloadJson)
                         val safeName = payload.content ?: throw IllegalArgumentException("Name cannot be null")
+                        val safeVersion = payload.versionId ?: throw IllegalArgumentException("Version cannot be null")
                         fireBaseFireStore.collection("products")
                             .document(payload.id)
-                            .update("content", safeName)
+                            .update("content", safeName, "versionId", safeVersion)
                             .await()
+                        syncRepository.markDone(op.id)
                     }
                     catch (e: Exception){
                         Log.i("wxyz", e.message.toString())
@@ -90,10 +94,12 @@ class SyncWorker @AssistedInject constructor(@Assisted appContext: Context, @Ass
                 OpType.DELETE_PRODUCT -> {
                     try{
                         val payload = Json.decodeFromString<SyncUpdate>(op.payloadJson)
+                        val safeVersion = payload.versionId ?: throw IllegalArgumentException("Null version")
                         fireBaseFireStore.collection("products")
                             .document(payload.id)
-                            .update("isDeleted", true)
+                            .update("isDeleted", true, "versionId", safeVersion)
                             .await()
+                        syncRepository.markDone(op.id)
                     }
                     catch (e : Exception){
                         Log.i("wxyz", e.message.toString())
@@ -106,10 +112,12 @@ class SyncWorker @AssistedInject constructor(@Assisted appContext: Context, @Ass
                     try{
                         val payload = Json.decodeFromString<SyncUpdate>(op.payloadJson)
                         val safeChecked = payload.isChecked ?: throw IllegalArgumentException("Checked cannot be null")
+                        val safeVersion = payload.versionId ?: throw IllegalArgumentException("Null Version Number")
                         fireBaseFireStore.collection("products")
                             .document(payload.id)
-                            .update("isChecked", safeChecked)
+                            .update("isChecked", safeChecked, "versionId", safeVersion)
                             .await()
+                        syncRepository.markDone(op.id)
                     }
                     catch (e : Exception){
                         Log.i("wxyz", e.message.toString())
@@ -119,10 +127,12 @@ class SyncWorker @AssistedInject constructor(@Assisted appContext: Context, @Ass
                 OpType.DELETE_LIST -> {
                     try{
                         val payload = Json.decodeFromString<SyncUpdate>(op.payloadJson)
+                        val safeVersion = payload.versionId ?: throw IllegalArgumentException("Null Version")
                         fireBaseFireStore.collection("lists")
                             .document(payload.id)
-                            .update("isDeleted", true)
+                            .update("isDeleted", true, "versionId", safeVersion)
                             .await()
+                        syncRepository.markDone(op.id)
                     }
                     catch (e : Exception){
                         Log.i("wxyz", e.message.toString())
