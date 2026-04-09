@@ -46,9 +46,9 @@ object CommonComposables {
         Scaffold(
             modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
-                Box(Modifier.onSizeChanged { Log.i("wxyz", "topBar px=${it.height}") }) {
+                Box(Modifier.onSizeChanged {  }) {
                     CenterAlignedTopAppBar(
-                        windowInsets = WindowInsets.statusBars,   // ✅ key change
+                        windowInsets = WindowInsets.statusBars,
                         colors = TopAppBarDefaults.topAppBarColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             titleContentColor = MaterialTheme.colorScheme.primary,

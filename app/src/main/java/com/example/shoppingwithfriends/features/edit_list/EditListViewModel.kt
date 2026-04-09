@@ -68,7 +68,6 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
     val state: StateFlow<UiState> = _state
 
     fun onListNameChanged(newValue: String) {
-        Log.i("wxyz", "name changed")
         _state.update { it.copy(listName = newValue, isNameChanged = true) }
     }
 

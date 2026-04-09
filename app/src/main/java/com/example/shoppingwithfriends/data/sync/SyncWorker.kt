@@ -26,7 +26,6 @@ class SyncWorker @AssistedInject constructor(@Assisted appContext: Context, @Ass
     override suspend fun doWork(): Result {
 
         val pendingOpsList = syncRepository.getPendingOps().filter { it.state != SyncState.SYNCED }
-        Log.i("wxyz", pendingOpsList.toString())
         for(op in pendingOpsList){
             if(op.payloadJson == null) continue
             when(op.type){
