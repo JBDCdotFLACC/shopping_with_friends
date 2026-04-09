@@ -1,5 +1,6 @@
 package com.example.shoppingwithfriends.data
 
+import android.util.Log
 import androidx.paging.DiffingChangePayload
 import com.example.shoppingwithfriends.auth.AuthRepository
 import com.example.shoppingwithfriends.data.source.local.LocalProduct
@@ -10,6 +11,7 @@ import com.example.shoppingwithfriends.data.source.local.ShoppingDao
 import com.example.shoppingwithfriends.data.source.local.SyncState
 import com.example.shoppingwithfriends.data.source.local.SyncUpdate
 import com.example.shoppingwithfriends.data.sync.SyncWorkManager
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -22,7 +24,8 @@ import javax.inject.Inject
 
 class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource: ShoppingDao,
                                                      private val authRepository: AuthRepository,
-                                                     private val syncWorkManager: SyncWorkManager
+                                                     private val syncWorkManager: SyncWorkManager,
+                                                     private val fireBaseFireStore : FirebaseFirestore
 ) : ShoppingListRepository {
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getAllListsForUser(): Flow<List<LocalShoppingList>> {
@@ -44,12 +47,14 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
         val user = authRepository.currentUser.first()
             ?: throw IllegalStateException("User not signed in")
         val shoppingListId = UUID.randomUUID().toString()
+        val versionId = UUID.randomUUID().toString()
         val newShoppingList = LocalShoppingList(
             id = shoppingListId,
             name = listName,
             date = date,
             owner = user.uid,
-            isDeleted = false
+            isDeleted = false,
+            versionId = versionId
         )
         localDataSource.insertShoppingList(newShoppingList)
         val json = Json.encodeToString(newShoppingList)
@@ -75,6 +80,8 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
             entityId = productId,
             payload = json)
         localDataSource.updateCompleted(productId, isChecked)
+        val versionId = UUID.randomUUID().toString()
+        localDataSource.updateProductVersionId(productId, versionId)
         localDataSource.insertPendingOp(pendingOp)
     }
 
@@ -83,6 +90,8 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
         val json = Json.encodeToString(syncUpdate)
         val pendingOp = createPendingOp(opType = OpType.DELETE_PRODUCT, entityId = productId, payload = json)
         localDataSource.deleteById(productId)
+        val versionId = UUID.randomUUID().toString()
+        localDataSource.updateProductVersionId(productId, versionId)
         localDataSource.insertPendingOp(pendingOp)
         syncWorkManager.scheduleSync()
     }
@@ -96,6 +105,8 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
             entityId = shoppingListId,
             payload = json)
         localDataSource.updateListName(shoppingListId, newName)
+        val versionId = UUID.randomUUID().toString()
+        localDataSource.updateShoppingListVersionId(shoppingListId, versionId)
         localDataSource.insertPendingOp(pendingOp)
         syncWorkManager.scheduleSync()
     }
@@ -107,6 +118,8 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
             entityId = productId,
             payload = json)
         localDataSource.updateProductName(productId, newName)
+        val versionId = UUID.randomUUID().toString()
+        localDataSource.updateProductVersionId(productId, versionId)
         localDataSource.insertPendingOp(pendingOp)
         syncWorkManager.scheduleSync()
     }
@@ -131,6 +144,8 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
         val pendingOp = createPendingOp(opType = OpType.DELETE_LIST, entityId = listId, payload = json)
         localDataSource.deleteShoppingList(listId)
         localDataSource.deleteProductsFromShoppingList(listId)
+        val versionId = UUID.randomUUID().toString()
+        localDataSource.updateShoppingListVersionId(listId, versionId)
         localDataSource.insertPendingOp(pendingOp)
         syncWorkManager.scheduleSync()
 
@@ -146,5 +161,19 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
             retryCount = 0,
             state = SyncState.PENDING
         )
+    }
+
+    override suspend fun pullRemoteDataForUser(){
+
+        val pendingSet = localDataSource.getOpsByState(SyncState.PENDING).map{it.id}.toSet()
+        //For our own list
+       fireBaseFireStore.collection("lists").get().addOnSuccessListener {documents ->
+           documents.toObjects(LocalShoppingList::class.java)
+        }
+        fireBaseFireStore.collection("products").get().addOnSuccessListener {documents ->
+            documents.toObjects(LocalProduct::class.java)
+        }
+        //Batch it
+        //Insert it
     }
 }

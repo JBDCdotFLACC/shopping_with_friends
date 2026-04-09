@@ -20,5 +20,8 @@ data class LocalShoppingList (
     @get:PropertyName("isDeleted")
     @set:PropertyName("isDeleted")
     @SerialName("isDeleted")
-    var isDeleted: Boolean = false
+    var isDeleted: Boolean = false,
+    @get:PropertyName("versionId")
+    @set:PropertyName("versionId")
+    var versionId: String
 )

@@ -7,4 +7,5 @@ interface SyncRepository {
     suspend fun getPendingOps() : List<PendingOp>
     suspend fun markDone(id : String)
     suspend fun markFailure(id : String)
+
 }

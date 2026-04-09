@@ -24,4 +24,7 @@ data class LocalProduct (
     @set:PropertyName("isDeleted")
     @SerialName("isDeleted")
     var isDeleted: Boolean = false,
+    @get:PropertyName("versionId")
+    @set:PropertyName("versionId")
+    var versionId: String
 )

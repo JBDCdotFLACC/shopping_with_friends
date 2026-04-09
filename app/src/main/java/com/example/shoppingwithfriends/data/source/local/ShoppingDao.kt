@@ -26,6 +26,12 @@ interface ShoppingDao {
     @Query("UPDATE shopping_list SET isDeleted = 1 WHERE id = :shoppingListId")
     suspend fun deleteShoppingList(shoppingListId: String)
 
+    @Query("UPDATE product SET versionId = :versionId WHERE id = :productId")
+    suspend fun updateProductVersionId(productId : String, versionId: String)
+
+    @Query("UPDATE shopping_list SET versionId = :versionId WHERE id = :shoppingListId")
+    suspend fun updateShoppingListVersionId(shoppingListId : String, versionId: String)
+
     @Query("UPDATE product SET isDeleted = 1 WHERE parent = :shoppingListId ")
     suspend fun deleteProductsFromShoppingList(shoppingListId: String)
 

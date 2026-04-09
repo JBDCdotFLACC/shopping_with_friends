@@ -93,19 +93,19 @@ class EditListViewModel @Inject constructor(private val repo: ShoppingListReposi
 
     fun clearFocusRequest() {
         _focusProductId.value = null
-        Log.i("wxyz", "clear focus")
     }
 
     fun addItem(){
         viewModelScope.launch {
             val newId = UUID.randomUUID().toString()
+            val versionId = UUID.randomUUID().toString()
             repo.addProduct(LocalProduct(
                 id = newId,
                 content = "",
                 parent =_listId.value ?: return@launch,
-                isChecked = false))
+                isChecked = false,
+                versionId = versionId))
             _focusProductId.value = newId
-            Log.i("wxyz", "newID")
         }
     }
 

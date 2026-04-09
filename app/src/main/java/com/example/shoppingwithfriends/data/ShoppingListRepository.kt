@@ -15,4 +15,5 @@ interface ShoppingListRepository {
     suspend fun addProduct(product : LocalProduct)
     suspend fun updateProductName(productId: String, newName : String)
     suspend fun deleteList(listId: String)
+    suspend fun pullRemoteDataForUser()
 }
