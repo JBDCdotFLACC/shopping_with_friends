@@ -13,15 +13,15 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class LocalShoppingList (
     @PrimaryKey
-    val id: String,
-    var name: String,
-    var date: Long,
-    var owner: String,
+    val id: String = "",
+    var name: String = "",
+    var date: Long = 0L,
+    var owner: String = "",
     @get:PropertyName("isDeleted")
     @set:PropertyName("isDeleted")
     @SerialName("isDeleted")
     var isDeleted: Boolean = false,
     @get:PropertyName("versionId")
     @set:PropertyName("versionId")
-    var versionId: String
+    var versionId: String = ""
 )

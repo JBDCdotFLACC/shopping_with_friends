@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.json.Json
 import java.util.Date
 import java.util.UUID
@@ -164,16 +165,21 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
     }
 
     override suspend fun pullRemoteDataForUser(){
+        val user = authRepository.currentUser.first()
+            ?: throw IllegalStateException("User not signed in")
+        val userId = user.uid
 
         val pendingSet = localDataSource.getOpsByState(SyncState.PENDING).map{it.id}.toSet()
+        //TODO filter out syncs
+        //TODO collaboration
         //For our own list
-       fireBaseFireStore.collection("lists").get().addOnSuccessListener {documents ->
-           documents.toObjects(LocalShoppingList::class.java)
-        }
-        fireBaseFireStore.collection("products").get().addOnSuccessListener {documents ->
-            documents.toObjects(LocalProduct::class.java)
-        }
-        //Batch it
-        //Insert it
+        val shoppingListDocuments = fireBaseFireStore.collection("lists").whereEqualTo("owner", userId).whereEqualTo("isDeleted", false).get().await()
+        val shoppingLists = shoppingListDocuments.toObjects(LocalShoppingList::class.java)
+        Log.i("wxyz", shoppingLists.size.toString())
+        localDataSource.insertAllShoppingLists(shoppingLists)
+        val productDocuments = fireBaseFireStore.collection("products").whereEqualTo("isDeleted", false).get().await()
+        val products = productDocuments.toObjects(LocalProduct::class.java)
+        Log.i("wxyz", products.size.toString())
+        localDataSource.insertAllProducts(products)
     }
 }

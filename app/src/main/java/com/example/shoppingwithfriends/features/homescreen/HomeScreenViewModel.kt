@@ -40,7 +40,6 @@ class HomeScreenViewModel @Inject constructor(private val repo: ShoppingListRepo
     val state: StateFlow<UiState> = _state
 
     init {
-        Log.d("HomeVM", "init VM ${this.hashCode()}")
         refresh()
     }
 
@@ -58,6 +57,7 @@ class HomeScreenViewModel @Inject constructor(private val repo: ShoppingListRepo
     }
 
     fun refresh() = viewModelScope.launch {
+        repo.pullRemoteDataForUser()
         _state.update { it.copy(isLoading = true, error = null) }
         runCatching { repo.getAllListsForUser() }
             .onSuccess { list -> _state.update { val newState = it.copy(isLoading = false)

@@ -13,18 +13,18 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class LocalProduct (
     @PrimaryKey
-    val id: String,
-    var content: String,
-    var parent: String,
+    val id: String = "",
+    var content: String = "",
+    var parent: String = "",
     @get:PropertyName("isChecked")
     @set:PropertyName("isChecked")
     @SerialName("isChecked")
-    var isChecked: Boolean,
+    var isChecked: Boolean = false,
     @get:PropertyName("isDeleted")
     @set:PropertyName("isDeleted")
     @SerialName("isDeleted")
     var isDeleted: Boolean = false,
     @get:PropertyName("versionId")
     @set:PropertyName("versionId")
-    var versionId: String
+    var versionId: String = ""
 )
