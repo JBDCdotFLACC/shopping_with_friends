@@ -51,6 +51,9 @@ interface ShoppingDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAllProducts(localProducts : List<LocalProduct>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUser(vararg user: User)
+
     @Query(value = "SELECT * FROM shopping_list WHERE id = :shoppingListId")
     suspend fun getShoppingList(shoppingListId : String) : LocalShoppingList
 

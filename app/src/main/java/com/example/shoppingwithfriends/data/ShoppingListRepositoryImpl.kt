@@ -3,6 +3,7 @@ package com.example.shoppingwithfriends.data
 import android.util.Log
 import androidx.paging.DiffingChangePayload
 import com.example.shoppingwithfriends.auth.AuthRepository
+import com.example.shoppingwithfriends.data.Utils.createPendingOp
 import com.example.shoppingwithfriends.data.source.local.LocalProduct
 import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
 import com.example.shoppingwithfriends.data.source.local.OpType
@@ -152,18 +153,6 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
 
     }
 
-    fun createPendingOp(opType : OpType, entityId : String, payload: String?) : PendingOp{
-        val opId = UUID.randomUUID().toString()
-        return PendingOp(id = opId,
-            type = opType,
-            entityId = entityId,
-            payloadJson = payload,
-            createdAt = Date().time,
-            retryCount = 0,
-            state = SyncState.PENDING
-        )
-    }
-
     override suspend fun pullRemoteDataForUser(){
         val user = authRepository.currentUser.first()
             ?: throw IllegalStateException("User not signed in")
@@ -175,11 +164,9 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
         //For our own list
         val shoppingListDocuments = fireBaseFireStore.collection("lists").whereEqualTo("owner", userId).whereEqualTo("isDeleted", false).get().await()
         val shoppingLists = shoppingListDocuments.toObjects(LocalShoppingList::class.java)
-        Log.i("wxyz", shoppingLists.size.toString())
         localDataSource.insertAllShoppingLists(shoppingLists)
         val productDocuments = fireBaseFireStore.collection("products").whereEqualTo("isDeleted", false).get().await()
         val products = productDocuments.toObjects(LocalProduct::class.java)
-        Log.i("wxyz", products.size.toString())
         localDataSource.insertAllProducts(products)
     }
 }
