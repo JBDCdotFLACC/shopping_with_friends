@@ -8,11 +8,18 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    authRepository: AuthRepository
+    val authRepository: AuthRepository
 ) : ViewModel() {
+
+    fun logout(){
+        viewModelScope.launch{
+            authRepository.logout()
+        }
+    }
 
     val currentUser: StateFlow<FirebaseUser?> =
         authRepository.currentUser

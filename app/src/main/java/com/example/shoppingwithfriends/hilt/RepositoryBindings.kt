@@ -4,6 +4,8 @@ import com.example.shoppingwithfriends.auth.AuthRepository
 import com.example.shoppingwithfriends.auth.AuthRepositoryImpl
 import com.example.shoppingwithfriends.data.ShoppingListRepository
 import com.example.shoppingwithfriends.data.ShoppingListRepositoryImpl
+import com.example.shoppingwithfriends.data.UserRepository
+import com.example.shoppingwithfriends.data.UserRepositoryImpl
 import com.example.shoppingwithfriends.data.sync.SyncRepository
 import com.example.shoppingwithfriends.data.sync.SyncRepositoryImpl
 import dagger.Binds
@@ -26,4 +28,8 @@ abstract class RepositoryBindings {
     @Binds
     @Singleton
     abstract fun bindSyncRepo(impl: SyncRepositoryImpl) : SyncRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUserRepo(impl: UserRepositoryImpl) : UserRepository
 }

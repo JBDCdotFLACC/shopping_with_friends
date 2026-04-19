@@ -29,7 +29,7 @@ class AuthRepositoryImpl @Inject constructor(private val auth: FirebaseAuth) : A
         // AuthStateListener fires automatically
     }
 
-    override suspend fun signOut() {
+    override suspend fun logout() {
         auth.signOut()
         // AuthStateListener fires automatically
     }

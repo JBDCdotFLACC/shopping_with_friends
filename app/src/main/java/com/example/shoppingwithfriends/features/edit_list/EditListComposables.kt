@@ -130,7 +130,7 @@ object EditListComposables {
                                actions: EditListActions,
                                products : List<LocalProduct>,
                                focusProductId : String?) {
-        AppScaffold { innerPadding ->
+        AppScaffold(content = { innerPadding ->
             when {
                 uiState.isLoading -> Loading(innerPadding)
                 uiState.error != null -> Error(innerPadding)
@@ -141,7 +141,7 @@ object EditListComposables {
                     focusProductId = focusProductId)
                 }
             }
-        }
+        })
     }
 
     @Composable

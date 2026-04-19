@@ -81,7 +81,7 @@ object HomeScreenComposables {
                                 goToEditList: (String) -> Unit,
                                 submitFormName : (String) -> Unit,
                                deleteShoppingList: (String) -> Unit) {
-        AppScaffold { innerPadding ->
+        AppScaffold (content ={ innerPadding ->
             when {
                 uiState.isLoading -> Loading(innerPadding)
                 uiState.error != null -> Error(innerPadding)
@@ -91,7 +91,7 @@ object HomeScreenComposables {
                     submitFormName,
                     deleteShoppingList)
             }
-        }
+        })
     }
 
     @Composable

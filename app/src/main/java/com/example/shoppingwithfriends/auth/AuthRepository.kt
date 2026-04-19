@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.Flow
 interface AuthRepository {
     val currentUser: Flow<FirebaseUser?>
     suspend fun signInWithGoogleIdToken(idToken: String)
-    suspend fun signOut()
+    suspend fun logout()
 }

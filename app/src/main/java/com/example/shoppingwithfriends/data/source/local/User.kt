@@ -2,11 +2,13 @@ package com.example.shoppingwithfriends.data.source.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
 @Entity(
     tableName = "user"
 )
 
+@Serializable
 data class User (
     @PrimaryKey
     val id: String = "",

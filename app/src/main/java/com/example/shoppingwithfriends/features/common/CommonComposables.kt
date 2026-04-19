@@ -23,13 +23,20 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.shoppingwithfriends.R
+import com.example.shoppingwithfriends.auth.AuthViewModel
+import jakarta.inject.Inject
 
 
 object CommonComposables {
@@ -38,13 +45,14 @@ object CommonComposables {
     @Composable
     fun AppScaffold(
         modifier: Modifier = Modifier,
-        // Top bar slots
         scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(
             rememberTopAppBarState()
         ),
         // Screen content (gets the inner padding from Scaffold)
-        content: @Composable (PaddingValues) -> Unit
+        content: @Composable (PaddingValues) -> Unit,
+        authViewModel: AuthViewModel = hiltViewModel()
     ) {
+        var menuExpanded by remember { mutableStateOf(false) }
         Scaffold(
             modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
@@ -63,12 +71,18 @@ object CommonComposables {
                             )
                         },
                         navigationIcon = {
-                            IconButton(onClick = { /* TODO */ }) {
+
+                            IconButton(onClick = { }) {
                                 Icon(Icons.Filled.Person, contentDescription = "Profile")
                             }
                         },
                         actions = {
-                            IconButton(onClick = { /* open menu */ }) {
+                            GlobalDropdownMenu(
+                                expanded = menuExpanded,
+                                onDismissRequest = { menuExpanded = false },
+                                authViewModel = authViewModel
+                            )
+                            IconButton(onClick = {  menuExpanded = true }) {
                                 Icon(Icons.Filled.Menu, contentDescription = "Menu")
                             }
                         },
@@ -86,7 +100,8 @@ object CommonComposables {
     @Composable
     fun GlobalDropdownMenu(
         expanded: Boolean,
-        onDismissRequest: () -> Unit
+        onDismissRequest: () -> Unit,
+        authViewModel: AuthViewModel
     ) {
         DropdownMenu(
             expanded = expanded,
@@ -94,11 +109,14 @@ object CommonComposables {
         ) {
             DropdownMenuItem(
                 text = { Text("Profile") },
-                onClick = { /* Handle Profile */ onDismissRequest() }
+                onClick = { onDismissRequest() }
             )
             DropdownMenuItem(
-                text = { Text("Settings") },
-                onClick = { /* Handle Settings */ onDismissRequest() }
+                text = { Text("Logout") },
+
+                onClick = {
+                    authViewModel.logout()
+                    onDismissRequest() }
             )
         }
     }
