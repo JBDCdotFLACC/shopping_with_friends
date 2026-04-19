@@ -40,8 +40,7 @@ import kotlinx.coroutines.launch
 
 object LoginScreenComposables {
     @Composable
-    fun LoginScreen(vm : LoginViewModel = hiltViewModel(),
-                    onSuccess: () -> Unit){
+    fun LoginScreen(vm : LoginViewModel = hiltViewModel()){
         val uiState by vm.uiState.collectAsState()
         LoginScreenLayout( isLoading = uiState == LoginState.Loading,
             vm::firebaseAuthWithGoogle)

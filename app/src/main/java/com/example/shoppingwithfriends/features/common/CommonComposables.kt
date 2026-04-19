@@ -11,6 +11,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,7 +26,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.shoppingwithfriends.R
 
 
 object CommonComposables {
@@ -34,9 +39,6 @@ object CommonComposables {
     fun AppScaffold(
         modifier: Modifier = Modifier,
         // Top bar slots
-        title: @Composable () -> Unit,
-        navigationIcon: @Composable () -> Unit = {},
-        actions: @Composable RowScope.() -> Unit = {},
         scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(
             rememberTopAppBarState()
         ),
@@ -53,9 +55,23 @@ object CommonComposables {
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             titleContentColor = MaterialTheme.colorScheme.primary,
                         ),
-                        title = title,
-                        navigationIcon = navigationIcon,
-                        actions = actions,
+                        title = {
+                            Text(
+                                text = stringResource(R.string.app_name),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = { /* TODO */ }) {
+                                Icon(Icons.Filled.Person, contentDescription = "Profile")
+                            }
+                        },
+                        actions = {
+                            IconButton(onClick = { /* open menu */ }) {
+                                Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                            }
+                        },
                         scrollBehavior = scrollBehavior
                     )
 
@@ -64,6 +80,26 @@ object CommonComposables {
             },
         ) { innerPadding ->
             content(innerPadding)
+        }
+    }
+
+    @Composable
+    fun GlobalDropdownMenu(
+        expanded: Boolean,
+        onDismissRequest: () -> Unit
+    ) {
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = onDismissRequest
+        ) {
+            DropdownMenuItem(
+                text = { Text("Profile") },
+                onClick = { /* Handle Profile */ onDismissRequest() }
+            )
+            DropdownMenuItem(
+                text = { Text("Settings") },
+                onClick = { /* Handle Settings */ onDismissRequest() }
+            )
         }
     }
 }

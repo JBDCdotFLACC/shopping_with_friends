@@ -51,7 +51,14 @@ class OnboardingViewModel @Inject constructor(private val authRepository: AuthRe
                 return@launch
             }
             else{
-                _state.update { it.copy(hint = user.displayName ?: user.email ?: "") }
+                if(userRepository.getUser(user.uid) != null)
+                {
+                    submitted()
+                }
+                else{
+                    //TODO check firebase for user
+                    _state.update { it.copy(hint = user.displayName ?: user.email ?: "") }
+                }
             }
         }
     }

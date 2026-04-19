@@ -29,6 +29,10 @@ class UserRepositoryImpl @Inject constructor(private val localDataSource: Shoppi
         syncWorkManager.scheduleSync()
     }
 
+    override suspend fun getUser(id: String) : User?{
+       return localDataSource.getUser(id)
+    }
+
     override suspend fun addEmail() {
         TODO("Not yet implemented")
     }

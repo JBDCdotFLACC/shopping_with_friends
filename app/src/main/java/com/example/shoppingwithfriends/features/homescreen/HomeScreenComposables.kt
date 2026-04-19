@@ -81,25 +81,7 @@ object HomeScreenComposables {
                                 goToEditList: (String) -> Unit,
                                 submitFormName : (String) -> Unit,
                                deleteShoppingList: (String) -> Unit) {
-        AppScaffold(
-            title = {
-                Text(
-                    text = stringResource(R.string.app_name),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            },
-            navigationIcon = {
-                IconButton(onClick = { /* TODO */ }) {
-                    Icon(Icons.Filled.Person, contentDescription = "Profile")
-                }
-            },
-            actions = {
-                IconButton(onClick = { /* open menu */ }) {
-                    Icon(Icons.Filled.Menu, contentDescription = "Menu")
-                }
-            }
-        ) { innerPadding ->
+        AppScaffold { innerPadding ->
             when {
                 uiState.isLoading -> Loading(innerPadding)
                 uiState.error != null -> Error(innerPadding)

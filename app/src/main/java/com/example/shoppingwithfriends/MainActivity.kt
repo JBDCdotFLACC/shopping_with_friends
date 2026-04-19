@@ -23,6 +23,7 @@ import com.example.shoppingwithfriends.auth.AuthViewModel
 import com.example.shoppingwithfriends.features.edit_list.EditListComposables
 import com.example.shoppingwithfriends.features.homescreen.HomeScreenComposables
 import com.example.shoppingwithfriends.features.login.LoginScreenComposables.LoginScreen
+import com.example.shoppingwithfriends.features.onboarding.OnboardingComposables
 import com.example.shoppingwithfriends.ui.theme.ShoppingWithFriendsTheme
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
@@ -47,7 +48,7 @@ class MainActivity @Inject constructor()
     fun MyApp(authViewModel: AuthViewModel = hiltViewModel()) {
         val user by authViewModel.currentUser.collectAsStateWithLifecycle()
         // IMPORTANT: key the backstack by auth state so it resets when login/logout happens
-        val start = if (user == null) Login else Home
+        val start = if (user == null) Login else Onboarding
         key(start) {
             val backStack = rememberNavBackStack(start)
             NavDisplay(
@@ -75,7 +76,10 @@ class MainActivity @Inject constructor()
                 entryProvider = { key ->
                     when (key) {
                         is Login -> NavEntry(key) {
-                            LoginScreen(onSuccess = {backStack.add(Home)})
+                            LoginScreen()
+                        }
+                        is Onboarding -> NavEntry(key) {
+                            OnboardingComposables.OnboardingScreen(onSuccess = {backStack.add(Home)})
                         }
                         is Home -> NavEntry(key) {
                             HomeScreenComposables.HomeRoute(goToEditList = {id -> backStack.add(EditList(id))})
@@ -93,4 +97,5 @@ class MainActivity @Inject constructor()
 }
 @Serializable data object Login : NavKey
 @Serializable data object Home : NavKey
+@Serializable data object Onboarding : NavKey
 @Serializable data class EditList(val listId: String) : NavKey

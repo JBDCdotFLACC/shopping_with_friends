@@ -57,6 +57,9 @@ interface ShoppingDao {
     @Query(value = "SELECT * FROM shopping_list WHERE id = :shoppingListId")
     suspend fun getShoppingList(shoppingListId : String) : LocalShoppingList
 
+    @Query(value = "SELECT * FROM user WHERE id = :userId")
+    suspend fun getUser(userId : String) : User?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPendingOp(vararg pendingOp: PendingOp)
 
