@@ -1,5 +1,6 @@
 package com.example.shoppingwithfriends.features.onboarding
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.shoppingwithfriends.auth.AuthRepository
@@ -15,7 +16,7 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(private val authRepository: AuthRepository,
-    private val userRepository : UserRepository) : ViewModel() {
+                                              private val userRepository : UserRepository) : ViewModel() {
     data class UiState(
         val isLoading: Boolean = false,
         val error: String? = null,
@@ -27,6 +28,9 @@ class OnboardingViewModel @Inject constructor(private val authRepository: AuthRe
     )
 
 
+    init {
+        refresh()
+    }
 
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state
@@ -48,41 +52,53 @@ class OnboardingViewModel @Inject constructor(private val authRepository: AuthRe
 
     }
 
+    fun clearError(){
+        Log.i("wxyz", "clearing the error")
+        _state.update { it.copy(error = null) }
+    }
+
     fun refresh(){
         viewModelScope.launch {
-            val user = authRepository.currentUser.first()
-            if(user == null){
+            val user = authRepository.currentUser.first() ?: run {
                 returnToLogin()
                 return@launch
             }
+            if(userRepository.getUser(user.uid) != null)
+            {
+                submitted()
+            }
             else{
-                if(userRepository.getUser(user.uid) != null)
-                {
-                    submitted()
-                }
-                else{
-                    //TODO check firebase for user
-                    _state.update { it.copy(hint = user.displayName ?: user.email ?: "") }
-                }
+                //TODO check firebase for user
+                _state.update { it.copy(hint = user.displayName ?: user.email ?: "") }
             }
         }
     }
 
+    fun isPhoneNumberValid(phoneNumber: String): Boolean {
+        return android.util.Patterns.PHONE.matcher(phoneNumber).matches()
+    }
+
     fun onSubmitUser(){
         viewModelScope.launch {
-            val user = authRepository.currentUser.first()
-            if(user == null){
+            val user = authRepository.currentUser.first() ?: run {
+                //TODO actually make us return to login.  We should never hit this but I think it is important to check anyways.
                 returnToLogin()
                 return@launch
             }
-              else{
+            val phoneNumber = state.value.phoneNumber
+            if(!isPhoneNumberValid(phoneNumber) && phoneNumber.isNotBlank()){
+                Log.i("wxyz", "Submitting a bad phone number....")
+                _state.update {it.copy(error = "Invalid Phone Number", isLoading = false)}
+            }
+            else{
                 val newUser = User(id = user.uid,
                     displayName = state.value.displayName.ifEmpty { user.email.toString() },
                     email = user.email.toString(),
-                    phoneNumber = state.value.phoneNumber)
-                submitted()
+                    phoneNumber = phoneNumber.ifBlank { "" })
                 userRepository.addUser(newUser)
+                submitted()
             }
+
         }
     }
 }
