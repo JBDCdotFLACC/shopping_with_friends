@@ -22,7 +22,7 @@ class UserRepositoryImpl @Inject constructor(private val localDataSource: Shoppi
             ?: throw IllegalStateException("User not signed in")
         localDataSource.insertUser(newUser)
         val json = Json.encodeToString(newUser)
-        val pendingOp = createPendingOp(opType = OpType.CREATE_LIST,
+        val pendingOp = createPendingOp(opType = OpType.ADD_USER,
             entityId = newUser.id,
             payload = json)
         localDataSource.insertPendingOp(pendingOp)

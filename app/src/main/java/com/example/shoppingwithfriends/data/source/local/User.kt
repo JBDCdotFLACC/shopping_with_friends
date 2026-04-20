@@ -11,8 +11,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class User (
     @PrimaryKey
-    val id: String = "",
+    override val id: String = "",
     var email: String = "",
     var phoneNumber: String = "",
     var displayName: String = ""
-)
+) : FireBaseModel

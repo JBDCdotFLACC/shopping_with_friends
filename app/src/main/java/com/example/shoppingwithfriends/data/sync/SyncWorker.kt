@@ -8,8 +8,11 @@ import androidx.work.WorkerParameters
 import com.example.shoppingwithfriends.data.source.local.LocalProduct
 import com.example.shoppingwithfriends.data.source.local.LocalShoppingList
 import com.example.shoppingwithfriends.data.source.local.OpType
+import com.example.shoppingwithfriends.data.source.local.PendingOp
 import com.example.shoppingwithfriends.data.source.local.SyncState
 import com.example.shoppingwithfriends.data.source.local.SyncUpdate
+import com.example.shoppingwithfriends.data.source.local.User
+import com.example.shoppingwithfriends.data.source.local.FireBaseModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Source
 import dagger.assisted.Assisted
@@ -29,20 +32,7 @@ class SyncWorker @AssistedInject constructor(@Assisted appContext: Context, @Ass
         for(op in pendingOpsList){
             if(op.payloadJson == null) continue
             when(op.type){
-                OpType.CREATE_LIST -> {
-                    try{
-                        val payload = Json.decodeFromString<LocalShoppingList>(op.payloadJson)
-                        fireBaseFireStore.collection("lists")
-                            .document(payload.id)
-                            .set(payload)
-                            .await()
-                        syncRepository.markDone(op.id)
-                    }
-                    catch (e : Exception){
-                        Log.i("wxyz", e.message.toString())
-                        syncRepository.markFailure(op.id)
-                    }
-                }
+                OpType.CREATE_LIST -> createFirebaseDocument<LocalShoppingList>(op, "lists")
                 OpType.CREATE_PRODUCT -> {
                     try{
                         val payload = Json.decodeFromString<LocalProduct>(op.payloadJson)
@@ -138,10 +128,27 @@ class SyncWorker @AssistedInject constructor(@Assisted appContext: Context, @Ass
                         syncRepository.markFailure(op.id)
                     }
                 }
-
+                OpType.ADD_USER -> createFirebaseDocument<User>(op, "users")
             }
 
         }
         return Result.success()
     }
+    private suspend inline fun <reified T : FireBaseModel> createFirebaseDocument(op : PendingOp, path : String){
+        Log.i("wxyz", op.toString())
+        op.payloadJson ?: throw IllegalArgumentException("Name cannot be null")
+        try{
+            val payload = Json.decodeFromString<T>(op.payloadJson)
+            fireBaseFireStore.collection(path)
+                .document(payload.id)
+                .set(payload)
+                .await()
+            syncRepository.markDone(op.id)
+        }
+        catch (e : Exception){
+            Log.i("wxyz", e.message.toString())
+            syncRepository.markFailure(op.id)
+        }
+    }
+
 }

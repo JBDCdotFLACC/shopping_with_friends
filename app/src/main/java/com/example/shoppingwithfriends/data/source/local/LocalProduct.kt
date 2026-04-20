@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class LocalProduct (
     @PrimaryKey
-    val id: String = "",
+    override val id: String = "",
     var content: String = "",
     var parent: String = "",
     @get:PropertyName("isChecked")
@@ -27,4 +27,4 @@ data class LocalProduct (
     @get:PropertyName("versionId")
     @set:PropertyName("versionId")
     var versionId: String = ""
-)
+) : FireBaseModel

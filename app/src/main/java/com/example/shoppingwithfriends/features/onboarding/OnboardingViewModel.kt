@@ -22,6 +22,7 @@ class OnboardingViewModel @Inject constructor(private val authRepository: AuthRe
         val displayName: String = "",
         val isSubmitted: Boolean = false,
         val returnToLogin : Boolean = false,
+        val phoneNumber : String = "",
         val hint: String = ""
     )
 
@@ -32,6 +33,10 @@ class OnboardingViewModel @Inject constructor(private val authRepository: AuthRe
 
     fun onDisplayNameChanged(newValue: String) {
         _state.update { it.copy(displayName = newValue) }
+    }
+
+    fun onPhoneNumberChanged(newValue : String) {
+        _state.update {it.copy(phoneNumber = newValue)}
     }
 
     fun returnToLogin(){
@@ -71,7 +76,10 @@ class OnboardingViewModel @Inject constructor(private val authRepository: AuthRe
                 return@launch
             }
               else{
-                val newUser = User(id = user.uid, displayName = state.value.displayName.ifEmpty { user.email.toString() })
+                val newUser = User(id = user.uid,
+                    displayName = state.value.displayName.ifEmpty { user.email.toString() },
+                    email = user.email.toString(),
+                    phoneNumber = state.value.phoneNumber)
                 submitted()
                 userRepository.addUser(newUser)
             }

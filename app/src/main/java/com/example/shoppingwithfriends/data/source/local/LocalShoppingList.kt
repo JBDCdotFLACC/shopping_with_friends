@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class LocalShoppingList (
     @PrimaryKey
-    val id: String = "",
+    override val id: String = "",
     var name: String = "",
     var date: Long = 0L,
     var owner: String = "",
@@ -24,4 +24,4 @@ data class LocalShoppingList (
     @get:PropertyName("versionId")
     @set:PropertyName("versionId")
     var versionId: String = ""
-)
+) : FireBaseModel

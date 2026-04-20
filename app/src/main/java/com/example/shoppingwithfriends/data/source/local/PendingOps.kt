@@ -24,7 +24,8 @@ enum class OpType {
     DELETE_PRODUCT,
     CREATE_LIST,
     DELETE_LIST,
-    UPDATE_LIST_NAME
+    UPDATE_LIST_NAME,
+    ADD_USER
 }
 
 enum class SyncState {
