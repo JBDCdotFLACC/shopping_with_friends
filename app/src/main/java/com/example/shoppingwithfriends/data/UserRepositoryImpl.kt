@@ -2,12 +2,14 @@ package com.example.shoppingwithfriends.data
 
 import com.example.shoppingwithfriends.auth.AuthRepository
 import com.example.shoppingwithfriends.data.Utils.createPendingOp
+import com.example.shoppingwithfriends.data.source.local.LocalProduct
 import com.example.shoppingwithfriends.data.source.local.OpType
 import com.example.shoppingwithfriends.data.source.local.ShoppingDao
 import com.example.shoppingwithfriends.data.source.local.User
 import com.example.shoppingwithfriends.data.sync.SyncWorkManager
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
@@ -29,8 +31,11 @@ class UserRepositoryImpl @Inject constructor(private val localDataSource: Shoppi
         syncWorkManager.scheduleSync()
     }
 
-    override suspend fun getUser(id: String) : User?{
-       return localDataSource.getUser(id)
+    override suspend fun getUser(userId: String) : User?{
+        val localUser = localDataSource.getUser(userId)
+        if(localUser != null) return localUser
+        val document = fireBaseFireStore.collection("users").whereEqualTo("id", userId).get().await().firstOrNull()
+        return document?.toObject(User::class.java)
     }
 
     override suspend fun addEmail() {

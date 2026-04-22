@@ -8,6 +8,7 @@ import com.example.shoppingwithfriends.data.UserRepository
 import com.example.shoppingwithfriends.data.source.local.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -28,12 +29,14 @@ class OnboardingViewModel @Inject constructor(private val authRepository: AuthRe
     )
 
 
-    init {
-        refresh()
-    }
+
 
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state
+
+    init {
+        refresh()
+    }
 
     fun onDisplayNameChanged(newValue: String) {
         _state.update { it.copy(displayName = newValue) }
@@ -53,11 +56,11 @@ class OnboardingViewModel @Inject constructor(private val authRepository: AuthRe
     }
 
     fun clearError(){
-        Log.i("wxyz", "clearing the error")
         _state.update { it.copy(error = null) }
     }
 
     fun refresh(){
+        _state.update { it.copy(isLoading = true) }
         viewModelScope.launch {
             val user = authRepository.currentUser.first() ?: run {
                 returnToLogin()
@@ -68,8 +71,7 @@ class OnboardingViewModel @Inject constructor(private val authRepository: AuthRe
                 submitted()
             }
             else{
-                //TODO check firebase for user
-                _state.update { it.copy(hint = user.displayName ?: user.email ?: "") }
+                _state.update { it.copy(hint = user.displayName ?: user.email ?: "", isLoading = false) }
             }
         }
     }
@@ -79,6 +81,7 @@ class OnboardingViewModel @Inject constructor(private val authRepository: AuthRe
     }
 
     fun onSubmitUser(){
+        _state.update { it.copy(isLoading = true) }
         viewModelScope.launch {
             val user = authRepository.currentUser.first() ?: run {
                 //TODO actually make us return to login.  We should never hit this but I think it is important to check anyways.
@@ -87,7 +90,6 @@ class OnboardingViewModel @Inject constructor(private val authRepository: AuthRe
             }
             val phoneNumber = state.value.phoneNumber
             if(!isPhoneNumberValid(phoneNumber) && phoneNumber.isNotBlank()){
-                Log.i("wxyz", "Submitting a bad phone number....")
                 _state.update {it.copy(error = "Invalid Phone Number", isLoading = false)}
             }
             else{
