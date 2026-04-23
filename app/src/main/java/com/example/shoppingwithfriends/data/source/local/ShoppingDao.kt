@@ -58,6 +58,12 @@ interface ShoppingDao {
     @Query(value = "SELECT * FROM shopping_list WHERE id = :shoppingListId")
     suspend fun getShoppingList(shoppingListId : String) : LocalShoppingList
 
+    @Query(value = "SELECT * FROM user WHERE email = :email")
+    suspend fun getUserByEmail(email : String) : User?
+
+    @Query(value = "SELECT * FROM user where phoneNumber = :phoneNumber")
+    suspend fun getUserByPhoneNumber(phoneNumber : String) : User?
+
     @Query(value = "SELECT * FROM user WHERE id = :userId")
     suspend fun getUser(userId : String) : User?
 

@@ -17,3 +17,8 @@ data class User (
     var displayName: String = "",
     var friends : List<String> = listOf()
 ) : FireBaseModel
+
+enum class ContactType {
+    EMAIL,
+    PHONE
+}
