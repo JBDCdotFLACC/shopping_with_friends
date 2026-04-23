@@ -13,11 +13,14 @@ import com.example.shoppingwithfriends.data.source.local.SyncState
 import com.example.shoppingwithfriends.data.source.local.SyncUpdate
 import com.example.shoppingwithfriends.data.sync.SyncWorkManager
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.json.Json
 import java.util.Date
@@ -85,6 +88,7 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
         localDataSource.updateCompleted(productId, isChecked)
         localDataSource.updateProductVersionId(productId, versionId)
         localDataSource.insertPendingOp(pendingOp)
+        syncWorkManager.scheduleSync()
     }
 
     override suspend fun deleteProduct(productId: String) {
@@ -127,7 +131,20 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
     }
 
     override fun getProductList(shoppingListId: String): Flow<List<LocalProduct>> {
+        startFirestoreSyncForProducts(shoppingListId)
         return localDataSource.getProductList(shoppingListId)
+    }
+
+    private fun startFirestoreSyncForProducts(listId : String){
+        fireBaseFireStore.collection("products")
+            .whereEqualTo("parent", listId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null) return@addSnapshotListener
+                val productEntities = snapshot.toObjects(LocalProduct::class.java)
+                CoroutineScope(Dispatchers.IO).launch {
+                    localDataSource.insertAllProducts(productEntities)
+                }
+            }
     }
 
     override suspend fun addProduct(product: LocalProduct) {
