@@ -25,31 +25,13 @@ class SearchViewModel @Inject constructor(private val friendRepository: FriendRe
 
 
     fun searchForFriend(searchTerm : String){
-        _state.update { it.copy(isLoading = true) }
+        _state.update { it.copy(isLoading = true, error = null) }
         when{
             android.util.Patterns.PHONE.matcher(searchTerm).matches() -> {
-                viewModelScope.launch {
-                    val result = friendRepository.searchForFriend(searchTerm, ContactType.PHONE)
-                    if(result == null){
-                        _state.update { it.copy(error = "No user found with this phone number."
-                            , isLoading = false) }
-                    }
-                    else{
-                        _state.update { it.copy(result = result, isLoading = false) }
-                    }
-                }
+                handleSearch(searchTerm, ContactType.PHONE)
             }
             android.util.Patterns.EMAIL_ADDRESS.matcher(searchTerm).matches() -> {
-                viewModelScope.launch {
-                    val result = friendRepository.searchForFriend(searchTerm, ContactType.EMAIL)
-                    if(result == null){
-                        _state.update { it.copy(error = "No user found with this email address."
-                            , isLoading = false) }
-                    }
-                    else{
-                        _state.update { it.copy(result = result, isLoading = false) }
-                    }
-                }
+                handleSearch(searchTerm, ContactType.EMAIL)
             }
             else ->{
                 _state.update { it.copy(error = "Please enter a valid phone number or email address to search"
@@ -57,4 +39,19 @@ class SearchViewModel @Inject constructor(private val friendRepository: FriendRe
             }
         }
     }
+
+    private fun handleSearch(searchTerm : String, contactType: ContactType) {
+        val message = if(contactType == ContactType.EMAIL) "No user found with this email address." else "No user found with this phone number."
+        viewModelScope.launch {
+            val result = friendRepository.searchForFriend(searchTerm, contactType)
+            if(result == null){
+                _state.update { it.copy(error = message
+                    , isLoading = false) }
+            }
+            else{
+                _state.update { it.copy(result = result, isLoading = false) }
+            }
+        }
+    }
+
 }

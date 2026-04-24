@@ -13,4 +13,5 @@ class Converters {
     fun toOpState(value: String): SyncState {
         return SyncState.valueOf(value)
     }
+
 }

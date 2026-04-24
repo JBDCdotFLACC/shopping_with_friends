@@ -2,6 +2,8 @@ package com.example.shoppingwithfriends.hilt
 
 import com.example.shoppingwithfriends.auth.AuthRepository
 import com.example.shoppingwithfriends.auth.AuthRepositoryImpl
+import com.example.shoppingwithfriends.data.FriendRepository
+import com.example.shoppingwithfriends.data.FriendRepositoryImpl
 import com.example.shoppingwithfriends.data.ShoppingListRepository
 import com.example.shoppingwithfriends.data.ShoppingListRepositoryImpl
 import com.example.shoppingwithfriends.data.UserRepository
@@ -32,4 +34,8 @@ abstract class RepositoryBindings {
     @Binds
     @Singleton
     abstract fun bindUserRepo(impl: UserRepositoryImpl) : UserRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindFriendRepo(impl: FriendRepositoryImpl) : FriendRepository
 }

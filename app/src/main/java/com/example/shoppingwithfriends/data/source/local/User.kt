@@ -14,8 +14,7 @@ data class User (
     override val id: String = "",
     var email: String = "",
     var phoneNumber: String = "",
-    var displayName: String = "",
-    var friends : List<String> = listOf()
+    var displayName: String = ""
 ) : FireBaseModel
 
 enum class ContactType {
