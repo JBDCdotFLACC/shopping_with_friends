@@ -25,7 +25,11 @@ enum class OpType {
     CREATE_LIST,
     DELETE_LIST,
     UPDATE_LIST_NAME,
-    ADD_USER
+    ADD_USER,
+    SEND_FRIEND_REQUEST,
+    ACCEPT_FRIEND_REQUEST,
+    DECLINE_FRIEND_REQUEST,
+    REMOVE_FRIEND,
 }
 
 enum class SyncState {

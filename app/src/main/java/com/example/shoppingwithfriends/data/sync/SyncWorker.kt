@@ -13,6 +13,7 @@ import com.example.shoppingwithfriends.data.source.local.SyncState
 import com.example.shoppingwithfriends.data.source.local.SyncUpdate
 import com.example.shoppingwithfriends.data.source.local.User
 import com.example.shoppingwithfriends.data.source.local.FireBaseModel
+import com.example.shoppingwithfriends.data.source.local.FriendRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Source
 import dagger.assisted.Assisted
@@ -128,14 +129,15 @@ class SyncWorker @AssistedInject constructor(@Assisted appContext: Context, @Ass
                         syncRepository.markFailure(op.id)
                     }
                 }
+                OpType.SEND_FRIEND_REQUEST -> createFirebaseDocument<FriendRequest>(op, "friendRequest")
                 OpType.ADD_USER -> createFirebaseDocument<User>(op, "users")
+                else -> {}
             }
 
         }
         return Result.success()
     }
     private suspend inline fun <reified T : FireBaseModel> createFirebaseDocument(op : PendingOp, path : String){
-        Log.i("wxyz", op.toString())
         op.payloadJson ?: throw IllegalArgumentException("Name cannot be null")
         try{
             val payload = Json.decodeFromString<T>(op.payloadJson)

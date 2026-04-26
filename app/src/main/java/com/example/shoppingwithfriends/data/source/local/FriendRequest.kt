@@ -2,12 +2,15 @@ package com.example.shoppingwithfriends.data.source.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.google.firebase.firestore.PropertyName
+import kotlinx.serialization.Serializable
 
 
 @Entity(
     tableName = "friendRequest"
 )
 
+@Serializable
 class FriendRequest(
     @PrimaryKey
     override val id: String = "",
@@ -16,6 +19,7 @@ class FriendRequest(
     var status : FriendRequestStatus = FriendRequestStatus.PENDING
 ) : FireBaseModel
 
+@Serializable
 enum class FriendRequestStatus{
     ACCEPTED,
     PENDING,

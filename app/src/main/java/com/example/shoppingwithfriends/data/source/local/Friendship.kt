@@ -13,4 +13,5 @@ data class Friendship (
     override val id: String = "",
     var userId : String = "",
     var friendId : String = "",
+    var isFriend : Boolean = false
     ) : FireBaseModel

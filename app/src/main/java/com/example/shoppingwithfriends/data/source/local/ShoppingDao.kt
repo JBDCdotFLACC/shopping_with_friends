@@ -46,6 +46,7 @@ interface ShoppingDao {
     @Upsert()
     suspend fun insertProduct(vararg product: LocalProduct)
 
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAllShoppingLists(shoppingLists : List<LocalShoppingList>)
 
@@ -75,6 +76,15 @@ interface ShoppingDao {
 
     @Query("SELECT * FROM pending_ops WHERE state = :state")
     suspend fun getOpsByState(state: SyncState): List<PendingOp>
+
+    @Query("SELECT * FROM friendship WHERE userId = :userId AND friendId = :friendId AND isFriend = 1")
+    suspend fun getFriendship(userId : String, friendId : String) : Friendship?
+
+    @Query(value = "SELECT * FROM friendRequest WHERE userId = :userId AND requestedId = :requestedId")
+    suspend fun getFriendRequest(userId : String, requestedId : String) : FriendRequest?
+
+    @Upsert()
+    suspend fun insertFriendRequest(vararg friendRequest: FriendRequest)
 
     @Query("""
   SELECT * FROM pending_ops

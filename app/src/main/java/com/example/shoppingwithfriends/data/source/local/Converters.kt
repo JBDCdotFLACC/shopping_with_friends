@@ -14,4 +14,9 @@ class Converters {
         return SyncState.valueOf(value)
     }
 
+    @TypeConverter
+    fun fromFriendRequestStatus(status: FriendRequestStatus): String = status.name
+
+    @TypeConverter
+    fun toFriendRequestStatus(value: String): FriendRequestStatus = FriendRequestStatus.valueOf(value)
 }
