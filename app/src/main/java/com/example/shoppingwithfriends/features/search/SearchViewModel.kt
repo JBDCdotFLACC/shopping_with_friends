@@ -2,6 +2,7 @@ package com.example.shoppingwithfriends.features.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.shoppingwithfriends.auth.AuthRepository
 import com.example.shoppingwithfriends.data.FriendRepository
 import com.example.shoppingwithfriends.data.source.local.ContactType
 import com.example.shoppingwithfriends.data.source.local.User
@@ -13,7 +14,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class SearchViewModel @Inject constructor(private val friendRepository: FriendRepository) : ViewModel() {
+class SearchViewModel @Inject constructor(private val friendRepository: FriendRepository,
+                                          private val authRepository: AuthRepository) : ViewModel() {
     data class UiState(
         val isLoading: Boolean = false,
         val error: String? = null,
@@ -22,7 +24,6 @@ class SearchViewModel @Inject constructor(private val friendRepository: FriendRe
 
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state
-
 
     fun searchForFriend(searchTerm : String){
         _state.update { it.copy(isLoading = true, error = null) }
@@ -44,12 +45,19 @@ class SearchViewModel @Inject constructor(private val friendRepository: FriendRe
         val message = if(contactType == ContactType.EMAIL) "No user found with this email address." else "No user found with this phone number."
         viewModelScope.launch {
             val result = friendRepository.searchForFriend(searchTerm, contactType)
-            if(result == null){
-                _state.update { it.copy(error = message
-                    , isLoading = false) }
-            }
-            else{
-                _state.update { it.copy(result = result, isLoading = false) }
+            when{
+                result == null -> {
+                    _state.update { it.copy(error = message
+                        , isLoading = false)
+                    }
+                }
+                result.id == authRepository.getUserId() -> {
+                    _state.update { it.copy(error = "You cannot add yourself as a friend."
+                        , isLoading = false) }
+                }
+                else -> {
+                    _state.update { it.copy(result = result, isLoading = false) }
+                }
             }
         }
     }

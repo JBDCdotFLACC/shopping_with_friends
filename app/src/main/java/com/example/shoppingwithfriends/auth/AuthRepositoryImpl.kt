@@ -26,11 +26,14 @@ class AuthRepositoryImpl @Inject constructor(private val auth: FirebaseAuth) : A
     override suspend fun signInWithGoogleIdToken(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential).await()
-        // AuthStateListener fires automatically
     }
 
     override suspend fun logout() {
         auth.signOut()
-        // AuthStateListener fires automatically
+    }
+
+    override fun getUserId(): String {
+        return auth.currentUser?.uid
+            ?: throw IllegalStateException("Attempted to access User ID while logged out!")
     }
 }
