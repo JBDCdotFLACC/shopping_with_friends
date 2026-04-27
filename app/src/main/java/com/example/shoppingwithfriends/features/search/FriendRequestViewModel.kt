@@ -14,12 +14,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class SearchViewModel @Inject constructor(private val friendRepository: FriendRepository,
-                                          private val authRepository: AuthRepository) : ViewModel() {
+class FriendRequestViewModel @Inject constructor(private val friendRepository: FriendRepository,
+                                                 private val authRepository: AuthRepository) : ViewModel() {
     data class UiState(
         val isLoading: Boolean = false,
         val error: String? = null,
-        val result: User? = null
+        val searchResult: User? = null,
+        val friendRequestResult: FriendRepository.FriendRequestResponse? = null
     )
 
     private val _state = MutableStateFlow(UiState())
@@ -41,6 +42,18 @@ class SearchViewModel @Inject constructor(private val friendRepository: FriendRe
         }
     }
 
+    fun sendFriendRequest(requestedId : String){
+        _state.update { it.copy(isLoading = true) }
+        viewModelScope.launch {
+            val result = friendRepository.sendFriendRequest(requestedId)
+            _state.update { it.copy(isLoading = false, friendRequestResult = result) }
+        }
+    }
+
+    fun clearState(){
+        _state.update { UiState() }
+    }
+
     private fun handleSearch(searchTerm : String, contactType: ContactType) {
         val message = if(contactType == ContactType.EMAIL) "No user found with this email address." else "No user found with this phone number."
         viewModelScope.launch {
@@ -56,7 +69,7 @@ class SearchViewModel @Inject constructor(private val friendRepository: FriendRe
                         , isLoading = false) }
                 }
                 else -> {
-                    _state.update { it.copy(result = result, isLoading = false) }
+                    _state.update { it.copy(searchResult = result, isLoading = false) }
                 }
             }
         }
