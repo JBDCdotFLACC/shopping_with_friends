@@ -1,5 +1,6 @@
 package com.example.shoppingwithfriends.features.common
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -73,6 +74,7 @@ object CommonComposables {
         LaunchedEffect(searchState.friendRequestResult) {
             val requestedName = searchState.searchResult?.displayName
             searchState.friendRequestResult?.let { friendRequestResponse ->
+                friendRequestViewModel.clearSearchResults()
                 val message = when(friendRequestResponse){
                     FriendRepository.FriendRequestResponse.PENDING_SENT -> "You have already sent a friend request to $requestedName"
                     FriendRepository.FriendRequestResponse.ALREADY_FRIEND -> "You are already friends with $requestedName"
@@ -84,16 +86,17 @@ object CommonComposables {
                     message = message,
                     duration = SnackbarDuration.Short
                 )
-
                 friendRequestViewModel.clearState()
             }
         }
 
         if(searchState.searchResult != null){
+            Log.i("wxyz", "we have search results!")
             showSearchDialog = false
             showFriendRequestDialog = true
         }
         else{
+            Log.i("wxyz", "we do not have search results")
             showFriendRequestDialog = false
         }
         Scaffold(
@@ -248,7 +251,7 @@ object CommonComposables {
                 TextButton(
                     onClick = { onConfirm(uiState.searchResult.id) },
                 ) {
-                    Text("Delete")
+                    Text("Confirm")
                 }
             },
             dismissButton = {

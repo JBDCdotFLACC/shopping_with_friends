@@ -54,6 +54,10 @@ class FriendRequestViewModel @Inject constructor(private val friendRepository: F
         _state.update { UiState() }
     }
 
+    fun clearSearchResults(){
+        _state.update { it.copy(searchResult = null) }
+    }
+
     private fun handleSearch(searchTerm : String, contactType: ContactType) {
         val message = if(contactType == ContactType.EMAIL) "No user found with this email address." else "No user found with this phone number."
         viewModelScope.launch {
