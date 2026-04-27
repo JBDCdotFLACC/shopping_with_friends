@@ -30,12 +30,19 @@ class OnboardingViewModel @Inject constructor(private val authRepository: AuthRe
 
 
 
+    private fun observeAuthState() {
+        viewModelScope.launch {
+            authRepository.currentUser.collect { firebaseUser ->
+                refresh()
+            }
+        }
+    }
 
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state
 
     init {
-        refresh()
+        observeAuthState()
     }
 
     fun onDisplayNameChanged(newValue: String) {
@@ -55,19 +62,25 @@ class OnboardingViewModel @Inject constructor(private val authRepository: AuthRe
 
     }
 
+    fun clearSubmitted(){
+        _state.update { it.copy(isSubmitted = false) }
+    }
+
     fun clearError(){
         _state.update { it.copy(error = null) }
     }
 
     fun refresh(){
         _state.update { it.copy(isLoading = true) }
+        Log.i("wxyz", "in refresh!")
         viewModelScope.launch {
             val user = authRepository.currentUser.first() ?: run {
-                returnToLogin()
+                clearSubmitted()
                 return@launch
             }
             if(userRepository.getUser(user.uid) != null)
             {
+                Log.i("wxyz", user.email.toString())
                 submitted()
             }
             else{
