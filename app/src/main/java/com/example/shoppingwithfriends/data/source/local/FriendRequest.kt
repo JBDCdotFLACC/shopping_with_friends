@@ -2,7 +2,6 @@ package com.example.shoppingwithfriends.data.source.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.google.firebase.firestore.PropertyName
 import kotlinx.serialization.Serializable
 
 

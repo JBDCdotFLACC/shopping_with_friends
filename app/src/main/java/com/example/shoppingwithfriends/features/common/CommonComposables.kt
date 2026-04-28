@@ -72,9 +72,9 @@ object CommonComposables {
         val searchState by friendRequestViewModel.state.collectAsStateWithLifecycle()
         val snackbarHostState = remember { SnackbarHostState() }
         LaunchedEffect(searchState.friendRequestResult) {
+            friendRequestViewModel.clearSearchResults()
             val requestedName = searchState.searchResult?.displayName
             searchState.friendRequestResult?.let { friendRequestResponse ->
-                friendRequestViewModel.clearSearchResults()
                 val message = when(friendRequestResponse){
                     FriendRepository.FriendRequestResponse.PENDING_SENT -> "You have already sent a friend request to $requestedName"
                     FriendRepository.FriendRequestResponse.ALREADY_FRIEND -> "You are already friends with $requestedName"

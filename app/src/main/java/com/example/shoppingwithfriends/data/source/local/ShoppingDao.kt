@@ -86,6 +86,9 @@ interface ShoppingDao {
     @Upsert()
     suspend fun insertFriendRequest(vararg friendRequest: FriendRequest)
 
+    @Query("SELECT * FROM friendRequest WHERE userId = :userId AND status = 'PENDING'")
+    fun getFriendRequestsForUser(userId: String): Flow<List<FriendRequest>>
+
     @Query("""
   SELECT * FROM pending_ops
   WHERE state = 'PENDING'

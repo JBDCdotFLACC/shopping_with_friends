@@ -98,8 +98,8 @@ class FriendRepositoryImpl @Inject constructor(private val localDataSource: Shop
         TODO("Not yet implemented")
     }
 
-    override suspend fun getFriendRequests(): Flow<List<String>> {
-        TODO("Not yet implemented")
+    override fun getFriendRequests(userId: String): Flow<List<FriendRequest>> {
+        return localDataSource.getFriendRequestsForUser(userId)
     }
 
     override suspend fun acceptFriendRequest(requestId: String) {

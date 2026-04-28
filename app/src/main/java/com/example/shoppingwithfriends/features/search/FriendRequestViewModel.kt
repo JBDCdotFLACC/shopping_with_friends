@@ -5,14 +5,25 @@ import androidx.lifecycle.viewModelScope
 import com.example.shoppingwithfriends.auth.AuthRepository
 import com.example.shoppingwithfriends.data.FriendRepository
 import com.example.shoppingwithfriends.data.source.local.ContactType
+import com.example.shoppingwithfriends.data.source.local.FriendRequest
+import com.example.shoppingwithfriends.data.source.local.LocalProduct
 import com.example.shoppingwithfriends.data.source.local.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class FriendRequestViewModel @Inject constructor(private val friendRepository: FriendRepository,
                                                  private val authRepository: AuthRepository) : ViewModel() {
@@ -20,13 +31,28 @@ class FriendRequestViewModel @Inject constructor(private val friendRepository: F
         val isLoading: Boolean = false,
         val error: String? = null,
         val searchResult: User? = null,
-        val friendRequestResult: FriendRepository.FriendRequestResponse? = null
+        val friendRequestResult: FriendRepository.FriendRequestResponse? = null,
+        val pendingRequests: List<FriendRequest> = emptyList()
     )
 
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state
 
-    fun searchForFriend(searchTerm : String){
+    init {
+        viewModelScope.launch {
+            authRepository.currentUser
+                .filterNotNull()
+                .flatMapLatest { user ->
+                    friendRepository.getFriendRequests(user.uid)
+                }
+                .collect { requests ->
+                    _state.update { it.copy(pendingRequests = requests) }
+                }
+        }
+    }
+
+    fun gnvx,./e
+    1gggggg/1archForFriend(searchTerm : String){
         _state.update { it.copy(isLoading = true, error = null) }
         when{
             android.util.Patterns.PHONE.matcher(searchTerm).matches() -> {
