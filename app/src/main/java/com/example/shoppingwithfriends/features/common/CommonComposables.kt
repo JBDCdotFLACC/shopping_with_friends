@@ -7,11 +7,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -37,6 +40,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.stringResource
@@ -86,17 +90,15 @@ object CommonComposables {
                     message = message,
                     duration = SnackbarDuration.Short
                 )
-                friendRequestViewModel.clearState()
+                friendRequestViewModel.clearFriendRequestResult()
             }
         }
 
         if(searchState.searchResult != null){
-            Log.i("wxyz", "we have search results!")
             showSearchDialog = false
             showFriendRequestDialog = true
         }
         else{
-            Log.i("wxyz", "we do not have search results")
             showFriendRequestDialog = false
         }
         Scaffold(
@@ -120,17 +122,23 @@ object CommonComposables {
                             )
                         },
                         navigationIcon = {
-                            FriendsDropDownMenu (
-                                expanded = friendMenuExpanded,
-                                onDismissRequest = { friendMenuExpanded = false },
-                                openFriendSearchDialog = {
-                                    showSearchDialog = true
-                                    friendMenuExpanded = false // close the menu
+                            BadgedBox(badge = {Badge(modifier = Modifier.offset(x = (-4).dp, y = 4.dp),
+                                containerColor = Color.Red,
+                                contentColor = Color.White
+                            ) { if(searchState.pendingRequests.isNotEmpty())Text(searchState.pendingRequests.size.toString()) }}) {
+                                IconButton(onClick = { friendMenuExpanded = true }) {
+                                    Icon(Icons.Filled.Person, contentDescription = "Profile")
+                                    FriendsDropDownMenu (
+                                        expanded = friendMenuExpanded,
+                                        onDismissRequest = { friendMenuExpanded = false },
+                                        openFriendSearchDialog = {
+                                            showSearchDialog = true
+                                            friendMenuExpanded = false // close the menu
+                                        }
+                                    )
                                 }
-                            )
-                            IconButton(onClick = { friendMenuExpanded = true }) {
-                                Icon(Icons.Filled.Person, contentDescription = "Profile")
                             }
+
                         },
                         actions = {
                             GlobalDropdownMenu(
@@ -155,7 +163,8 @@ object CommonComposables {
                     onDismiss =
                         {
                             showSearchDialog = false
-                            friendRequestViewModel.clearState()
+                            friendRequestViewModel.clearSearchResults()
+
                         },
                     onSearch = { searchTerm ->
                         friendRequestViewModel.searchForFriend(searchTerm)
@@ -169,7 +178,7 @@ object CommonComposables {
                     uiState = searchState,
                     onDismiss = {
                         showFriendRequestDialog = false
-                        friendRequestViewModel.clearState()
+                        friendRequestViewModel.clearSearchResults()
                     }
                 )
             }

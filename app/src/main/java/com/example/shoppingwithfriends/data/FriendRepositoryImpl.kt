@@ -1,5 +1,6 @@
 package com.example.shoppingwithfriends.data
 
+import android.util.Log
 import androidx.room.PrimaryKey
 import com.example.shoppingwithfriends.auth.AuthRepository
 import com.example.shoppingwithfriends.data.Utils.createPendingOp

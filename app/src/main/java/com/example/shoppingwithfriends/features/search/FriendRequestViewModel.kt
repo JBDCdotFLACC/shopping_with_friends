@@ -6,22 +6,18 @@ import com.example.shoppingwithfriends.auth.AuthRepository
 import com.example.shoppingwithfriends.data.FriendRepository
 import com.example.shoppingwithfriends.data.source.local.ContactType
 import com.example.shoppingwithfriends.data.source.local.FriendRequest
-import com.example.shoppingwithfriends.data.source.local.LocalProduct
 import com.example.shoppingwithfriends.data.source.local.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.collections.emptyList
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -41,9 +37,13 @@ class FriendRequestViewModel @Inject constructor(private val friendRepository: F
     init {
         viewModelScope.launch {
             authRepository.currentUser
-                .filterNotNull()
                 .flatMapLatest { user ->
-                    friendRepository.getFriendRequests(user.uid)
+                    if(user == null){
+                        flowOf(emptyList())
+                    }
+                    else{
+                        friendRepository.getFriendRequests(user.uid)
+                    }
                 }
                 .collect { requests ->
                     _state.update { it.copy(pendingRequests = requests) }
@@ -51,8 +51,7 @@ class FriendRequestViewModel @Inject constructor(private val friendRepository: F
         }
     }
 
-    fun gnvx,./e
-    1gggggg/1archForFriend(searchTerm : String){
+    fun searchForFriend(searchTerm : String){
         _state.update { it.copy(isLoading = true, error = null) }
         when{
             android.util.Patterns.PHONE.matcher(searchTerm).matches() -> {
@@ -76,12 +75,13 @@ class FriendRequestViewModel @Inject constructor(private val friendRepository: F
         }
     }
 
-    fun clearState(){
-        _state.update { UiState() }
+    fun clearFriendRequestResult(){
+        _state.update { it.copy(friendRequestResult = null) }
     }
 
+
     fun clearSearchResults(){
-        _state.update { it.copy(searchResult = null) }
+        _state.update { it.copy(searchResult = null, error = null) }
     }
 
     private fun handleSearch(searchTerm : String, contactType: ContactType) {
