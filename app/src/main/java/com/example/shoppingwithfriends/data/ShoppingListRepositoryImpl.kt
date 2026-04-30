@@ -103,8 +103,6 @@ class ShoppingListRepositoryImpl @Inject constructor(private val localDataSource
     }
 
     override suspend fun updateListName(shoppingListId: String, newName: String) {
-        val user = authRepository.currentUser.first()
-            ?: throw IllegalStateException("User not signed in")
         val versionId = UUID.randomUUID().toString()
         val syncUpdate = SyncUpdate(id = shoppingListId, content = newName, versionId = versionId)
         val json = Json.encodeToString(syncUpdate)
