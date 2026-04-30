@@ -89,6 +89,9 @@ interface ShoppingDao {
     @Query("SELECT * FROM friendRequest WHERE requestedId = :userId AND status = 'PENDING'")
     fun getFriendRequestsForUser(userId: String): Flow<List<FriendRequest>>
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllFriendRequests(localProducts : List<FriendRequest>)
+
     @Query("""
   SELECT * FROM pending_ops
   WHERE state = 'PENDING'

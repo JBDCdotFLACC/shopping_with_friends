@@ -1,7 +1,5 @@
 package com.example.shoppingwithfriends.data
 
-import android.util.Log
-import androidx.room.PrimaryKey
 import com.example.shoppingwithfriends.auth.AuthRepository
 import com.example.shoppingwithfriends.data.Utils.createPendingOp
 import com.example.shoppingwithfriends.data.source.local.ContactType
@@ -12,7 +10,10 @@ import com.example.shoppingwithfriends.data.source.local.ShoppingDao
 import com.example.shoppingwithfriends.data.source.local.User
 import com.example.shoppingwithfriends.data.sync.SyncWorkManager
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.json.Json
 import java.util.UUID
@@ -100,7 +101,20 @@ class FriendRepositoryImpl @Inject constructor(private val localDataSource: Shop
     }
 
     override fun getFriendRequests(userId: String): Flow<List<FriendRequest>> {
+        startFirestoreSyncForFriendRequests(userId)
         return localDataSource.getFriendRequestsForUser(userId)
+    }
+
+    private fun startFirestoreSyncForFriendRequests(userId : String){
+        fireBaseFireStore.collection("friendRequest")
+            .whereEqualTo("requestedId", userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null) return@addSnapshotListener
+                val friendRequestEntities = snapshot.toObjects(FriendRequest::class.java)
+                CoroutineScope(Dispatchers.IO).launch {
+                    localDataSource.insertAllFriendRequests(friendRequestEntities)
+                }
+            }
     }
 
     override suspend fun acceptFriendRequest(requestId: String) {
