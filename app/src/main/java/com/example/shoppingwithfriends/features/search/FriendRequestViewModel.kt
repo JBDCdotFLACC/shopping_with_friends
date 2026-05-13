@@ -12,12 +12,10 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.collections.emptyList
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -33,6 +31,15 @@ class FriendRequestViewModel @Inject constructor(private val friendRepository: F
 
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state
+
+    // Helper for validation that can be overridden in tests
+    internal var validator: (String) -> ContactType? = { term ->
+        when {
+            android.util.Patterns.PHONE.matcher(term).matches() -> ContactType.PHONE
+            android.util.Patterns.EMAIL_ADDRESS.matcher(term).matches() -> ContactType.EMAIL
+            else -> null
+        }
+    }
 
     init {
         viewModelScope.launch {
@@ -53,17 +60,12 @@ class FriendRequestViewModel @Inject constructor(private val friendRepository: F
 
     fun searchForFriend(searchTerm : String){
         _state.update { it.copy(isLoading = true, error = null) }
-        when{
-            android.util.Patterns.PHONE.matcher(searchTerm).matches() -> {
-                handleSearch(searchTerm, ContactType.PHONE)
-            }
-            android.util.Patterns.EMAIL_ADDRESS.matcher(searchTerm).matches() -> {
-                handleSearch(searchTerm, ContactType.EMAIL)
-            }
-            else ->{
-                _state.update { it.copy(error = "Please enter a valid phone number or email address to search"
-                    , isLoading = false) }
-            }
+        val contactType = validator(searchTerm)
+        if (contactType != null) {
+            handleSearch(searchTerm, contactType)
+        } else {
+            _state.update { it.copy(error = "Please enter a valid phone number or email address to search"
+                , isLoading = false) }
         }
     }
 
